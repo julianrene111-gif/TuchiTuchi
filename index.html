@@ -953,7 +953,31 @@ select.input option { background: #1c1428; }
     <div class="modal-handle"></div>
     <div class="modal-title">⚙️ Configuración de IA</div>
 
+    <!-- Control de velocidad de voz -->
     <div style="margin-bottom:16px;">
+      <p style="font-size:13px;font-weight:600;color:var(--cream);margin-bottom:4px;">🔊 Velocidad de voz</p>
+      <p class="text-mute" style="font-size:11px;margin-bottom:10px;">Se guarda solo en este dispositivo</p>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:12px;color:var(--cream-mute);flex-shrink:0;">🐢 Lenta</span>
+        <input type="range" id="voice-rate-slider" min="0.5" max="2.0" step="0.05"
+          style="flex:1;accent-color:var(--rose);cursor:pointer;"
+          oninput="document.getElementById('voice-rate-val').textContent=parseFloat(this.value).toFixed(2);"/>
+        <span style="font-size:12px;color:var(--cream-mute);flex-shrink:0;">🐇 Rápida</span>
+      </div>
+      <div style="text-align:center;margin-top:6px;">
+        <span style="font-size:13px;font-weight:700;color:var(--rose-light);" id="voice-rate-val">0.88</span>
+        <span style="font-size:11px;color:var(--cream-mute);margin-left:4px;">velocidad</span>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+        <button onclick="_setVoicePreset(0.7)"  class="btn btn-ghost btn-sm" style="flex:1;font-size:11px;">🐢 Muy lenta</button>
+        <button onclick="_setVoicePreset(0.88)" class="btn btn-ghost btn-sm" style="flex:1;font-size:11px;">😌 Normal</button>
+        <button onclick="_setVoicePreset(1.1)"  class="btn btn-ghost btn-sm" style="flex:1;font-size:11px;">⚡ Rápida</button>
+        <button onclick="_setVoicePreset(1.4)"  class="btn btn-ghost btn-sm" style="flex:1;font-size:11px;">🚀 Muy rápida</button>
+      </div>
+      <button onclick="_testVoice()" class="btn btn-rose-ghost btn-sm btn-full" style="margin-top:8px;">🔊 Probar voz</button>
+    </div>
+
+    <div style="border-top:1px solid rgba(255,255,255,0.06);margin-bottom:16px;padding-top:16px;">
       <p style="font-size:13px;font-weight:600;color:var(--rose-light);margin-bottom:6px;">🔑 API Key de Claude (requerida)</p>
       <p class="text-mute mb-12" style="font-size:12px;line-height:1.6;">Para el chat con IA. Se guarda solo en tu cuenta.</p>
       <input type="password" class="input" id="apikey-input" placeholder="sk-ant-api03-..." autocomplete="off"/>
@@ -1204,7 +1228,7 @@ const G = (k, d) => {
 };
 
 // Claves que NUNCA van a Firestore — solo localStorage del dispositivo
-const LOCAL_ONLY_KEYS = ['tt_ak', 'tt_el'];
+const LOCAL_ONLY_KEYS = ['tt_ak', 'tt_el', 'tt_voice_rate'];
 
 function S(k, v) {
   // API keys: solo localStorage, NUNCA Firestore ni _cache compartido
@@ -1285,17 +1309,24 @@ document.getElementById('menu-apikey').addEventListener('click', () => {
   closeModal('modal-profile');
   const ak = G('tt_ak','');
   const el = G('tt_el','');
-  const inp = document.getElementById('apikey-input');
-  const elInp = document.getElementById('el-key-input');
-  inp.value = ak ? '••••••••••••••' : '';
-  elInp.value = el ? '••••••••••••••' : '';
+  const inp    = document.getElementById('apikey-input');
+  const elInp  = document.getElementById('el-key-input');
+  const slider = document.getElementById('voice-rate-slider');
+  const valEl  = document.getElementById('voice-rate-val');
+  inp.value    = ak ? '••••••••••••••' : '';
+  elInp.value  = el ? '••••••••••••••' : '';
   document.getElementById('apikey-status').textContent = ak ? '✅ API key de Claude guardada' : '';
-  document.getElementById('el-status').textContent = el ? '✅ ElevenLabs activo 🎙️' : '';
+  document.getElementById('el-status').textContent     = el ? '✅ ElevenLabs activo 🎙️' : '';
+  // Cargar velocidad guardada
+  const savedRate = (() => { try { const v=localStorage.getItem('tt_voice_rate'); return v?parseFloat(JSON.parse(v)):0.88; } catch(e){return 0.88;} })();
+  if (slider) { slider.value = savedRate; }
+  if (valEl)  { valEl.textContent = savedRate.toFixed(2); }
   openModal('modal-apikey');
 });
 document.getElementById('btn-save-apikey').addEventListener('click', () => {
-  const v  = document.getElementById('apikey-input').value.trim();
-  const ev = document.getElementById('el-key-input').value.trim();
+  const v   = document.getElementById('apikey-input').value.trim();
+  const ev  = document.getElementById('el-key-input').value.trim();
+  const sldr= document.getElementById('voice-rate-slider');
   let saved = false;
   if (v && v !== '••••••••••••••') {
     S('tt_ak', v);
@@ -1309,9 +1340,12 @@ document.getElementById('btn-save-apikey').addEventListener('click', () => {
     document.getElementById('el-key-input').value = '••••••••••••••';
     saved = true;
   }
+  if (sldr) {
+    S('tt_voice_rate', parseFloat(sldr.value));
+    saved = true;
+  }
   if (saved) {
     showToast('⚙️ Configuración guardada 💕');
-    // Ocultar banner inline si existe
     const banner = document.getElementById('apikey-banner');
     if (banner && G('tt_ak','')) banner.style.display = 'none';
     setTimeout(() => closeModal('modal-apikey'), 700);
@@ -2520,7 +2554,9 @@ function _speakBrowser(text) {
       vs.find(x => x.lang.startsWith('es'));
 
     if (v) { u.voice = v; }
-    u.rate  = 0.88;   /* velocidad natural */
+    // Tasa personal guardada en el dispositivo (0.5 – 2.0)
+    const savedRate = (() => { try { const v = localStorage.getItem('tt_voice_rate'); return v ? parseFloat(JSON.parse(v)) : 0.88; } catch(e){ return 0.88; } })();
+    u.rate  = savedRate;
     u.pitch = 1.05;   /* ligeramente más agudo — más femenino */
     u.volume = 1;
 
@@ -2544,6 +2580,21 @@ function stopSpeak() {
   if (bar) bar.style.display = 'none';
 }
 
+function _setVoicePreset(rate) {
+  const slider = document.getElementById('voice-rate-slider');
+  const valEl  = document.getElementById('voice-rate-val');
+  if (slider) slider.value = rate;
+  if (valEl)  valEl.textContent = rate.toFixed(2);
+}
+
+function _testVoice() {
+  const slider = document.getElementById('voice-rate-slider');
+  const rate   = slider ? parseFloat(slider.value) : 0.88;
+  // Guardar temporalmente para que speak() lo use
+  try { localStorage.setItem('tt_voice_rate', JSON.stringify(rate)); } catch(e) {}
+  speak('Hola mi reina, así se escucha tu voz con esta velocidad. ¿Te gusta?');
+}
+
 /* ════════════════════════════════════════
    HEALTH HELPERS (compartido)
    ════════════════════════════════════════ */
@@ -2562,7 +2613,9 @@ function _saveTodayHealth(entry) {
 
 /* ══ finance.js ══ */
 /* ════════════════════════════════════════
-   FINANCE.JS — TuchiTuchi v2
+   FINANCE.JS — TuchiTuchi v3
+   Funciones de Finanzas Claras adaptadas
+   al estilo TuchiTuchi (localStorage)
    ════════════════════════════════════════ */
 
 const _finCSS = document.createElement('style');
@@ -2570,22 +2623,25 @@ _finCSS.textContent = `
 /* ─ Finance tabs ─ */
 .fin-tabs {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   margin-bottom: 16px;
   background: var(--ink-soft);
   border-radius: var(--r-md);
   padding: 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .fin-tab-btn {
   flex: 1;
-  padding: 8px 4px;
+  padding: 7px 4px;
   border-radius: 10px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: var(--cream-mute);
   transition: all 0.2s;
   text-align: center;
   cursor: pointer;
+  white-space: nowrap;
 }
 .fin-tab-btn.active {
   background: var(--ink-card);
@@ -2594,7 +2650,8 @@ _finCSS.textContent = `
 }
 .fin-panel { display: none; }
 .fin-panel.active { display: block; animation: fade-in-up 0.22s var(--ease); }
-/* ─ History items ─ */
+
+/* ─ Transaction items ─ */
 .tx-item {
   display: flex;
   align-items: center;
@@ -2604,16 +2661,12 @@ _finCSS.textContent = `
 }
 .tx-item:last-child { border-bottom: none; padding-bottom: 0; }
 .tx-icon {
-  width: 38px;
-  height: 38px;
+  width: 38px; height: 38px;
   border-radius: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 17px;
-  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; flex-shrink: 0;
 }
-.tx-icon.income { background: rgba(86,217,160,0.12); }
+.tx-icon.income  { background: rgba(86,217,160,0.12); }
 .tx-icon.expense { background: rgba(232,84,122,0.1); }
 .tx-info { flex: 1; min-width: 0; }
 .tx-desc { font-size: 13px; color: var(--cream); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2623,6 +2676,7 @@ _finCSS.textContent = `
 .tx-amount.expense { color: var(--rose-light); }
 .tx-del { color: rgba(240,106,106,0.4); font-size: 18px; cursor: pointer; flex-shrink: 0; padding: 4px; }
 .tx-del:active { color: var(--danger); }
+
 /* ─ Goal card ─ */
 .goal-card {
   background: var(--ink-lift);
@@ -2632,9 +2686,10 @@ _finCSS.textContent = `
   border: 1px solid rgba(255,255,255,0.06);
 }
 .goal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.goal-name { font-size: 14px; font-weight: 600; color: var(--cream); }
-.goal-pct  { font-size: 13px; font-weight: 700; color: var(--plum-light); }
-.goal-amounts { display: flex; justify-content: space-between; font-size: 11px; color: var(--cream-mute); margin-bottom: 8px; }
+.goal-name   { font-size: 14px; font-weight: 600; color: var(--cream); }
+.goal-pct    { font-size: 13px; font-weight: 700; color: var(--plum-light); }
+.goal-amounts{ display: flex; justify-content: space-between; font-size: 11px; color: var(--cream-mute); margin-bottom: 8px; }
+
 /* ─ Debt card ─ */
 .debt-card {
   background: var(--ink-lift);
@@ -2643,6 +2698,25 @@ _finCSS.textContent = `
   margin-bottom: 10px;
   border: 1px solid rgba(255,255,255,0.06);
 }
+
+/* ─ Budget card ─ */
+.bud-card {
+  background: var(--ink-lift);
+  border-radius: var(--r-md);
+  padding: 14px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ─ Recurring card ─ */
+.rec-card {
+  background: var(--ink-lift);
+  border-radius: var(--r-md);
+  padding: 14px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
 /* ─ Summary strip ─ */
 .balance-strip {
   background: linear-gradient(135deg, var(--ink-card) 0%, rgba(155,89,182,0.1) 100%);
@@ -2660,32 +2734,77 @@ _finCSS.textContent = `
   margin-bottom: 4px;
 }
 .balance-label { font-size: 12px; color: var(--cream-mute); }
+
+/* ─ Progress bar fin ─ */
+.fin-pw { background: rgba(255,255,255,0.08); border-radius: 99px; height: 7px; overflow: hidden; margin-bottom: 5px; }
+.fin-pb { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--rose), var(--plum-light)); transition: width 0.5s; }
+.fin-pb.g { background: linear-gradient(90deg, var(--mint), #00c97a); }
+.fin-pb.y { background: linear-gradient(90deg, var(--gold), #e5a83a); }
+.fin-pb.r { background: linear-gradient(90deg, var(--danger), #e83a3a); }
+
+/* ─ Report bar ─ */
+.rep-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.rep-bar-lbl { width: 120px; font-size: 11px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--cream-mute); }
+.rep-bar-track { flex: 1; background: rgba(255,255,255,0.08); border-radius: 99px; height: 8px; overflow: hidden; }
+.rep-bar-fill  { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--rose), var(--plum-light)); }
+.rep-bar-pct   { width: 32px; text-align: right; font-size: 10px; color: var(--cream-mute); }
+
+/* ─ Achievement ─ */
+.ach-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.ach-item:last-child { border-bottom: none; }
+.ach-item.unl .ach-name { color: var(--gold); }
+.ach-item:not(.unl) { opacity: 0.45; }
 `;
 document.head.appendChild(_finCSS);
 
 /* ════════════════════════════════════════
-   RENDER FINANCE
+   DATA HELPERS (localStorage)
+   ════════════════════════════════════════ */
+const _FIN_KEYS = {
+  tx: 'tt_fin_tx',
+  debts: 'tt_fin_debts',
+  goals: 'tt_fin_goals',
+  budgets: 'tt_fin_budgets',
+  recurring: 'tt_fin_recurring',
+};
+function _fGet(key) { return G(_FIN_KEYS[key], []); }
+function _fSet(key, val) { S(_FIN_KEYS[key], val); }
+
+const _FIN_UID = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+const _FIN_TODAY = () => new Date().toLocaleDateString('es-CO');
+const _FIN_FMT = (n) => '$' + Math.round(n || 0).toLocaleString('es-CO');
+const _FIN_MK = (d) => {
+  const dt = d ? new Date(d + 'T12:00:00') : new Date();
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
+};
+const _FIN_CM = () => _FIN_MK();
+
+const INC_CATS_FIN = ['💼 Salario', '💰 Freelance', '📈 Inversiones', '🎁 Regalo', '🏠 Arriendo recibido', '💳 Reembolso', '🌟 Otro ingreso'];
+const EXP_CATS_FIN = ['🏠 Vivienda', '🍔 Alimentación', '🚗 Transporte', '💊 Salud', '🎓 Educación', '👕 Ropa', '🎮 Entretenimiento', '💡 Servicios', '📱 Tecnología', '💳 Deudas', '🎯 Metas', '💕 Pareja', '🌟 Otro'];
+
+/* ════════════════════════════════════════
+   RENDER FINANCE (pantalla principal)
    ════════════════════════════════════════ */
 function _renderFinance() {
   const screen = document.getElementById('screen-finance');
-
-  const txs = G('tt_tx', []);
-  const inc = txs.filter(t=>t.tp==='income').reduce((a,t)=>a+t.am,0);
-  const exp = txs.filter(t=>t.tp==='expense').reduce((a,t)=>a+t.am,0);
+  const txs = _fGet('tx');
+  const realTx = txs.filter(t => t.cat !== '🔀 Transferencia');
+  const inc = realTx.filter(t => t.tp === 'income').reduce((a, t) => a + (t.am || 0), 0);
+  const exp = realTx.filter(t => t.tp === 'expense').reduce((a, t) => a + (t.am || 0), 0);
   const bal = inc - exp;
 
   screen.innerHTML = `
     <!-- Balance strip -->
     <div class="balance-strip anim-in">
-      <div class="balance-main" style="color:${bal>=0?'var(--mint)':'var(--danger)'}">$${Math.abs(bal).toLocaleString('es-CO')}</div>
-      <div class="balance-label">${bal>=0?'Balance disponible':'Gastos superiores a ingresos'}</div>
+      <div class="balance-main" style="color:${bal >= 0 ? 'var(--mint)' : 'var(--danger)'}">${_FIN_FMT(Math.abs(bal))}</div>
+      <div class="balance-label">${bal >= 0 ? 'Balance disponible' : 'Gastos superiores a ingresos'}</div>
       <div class="stat-grid" style="margin-top:14px;">
         <div class="stat-item">
-          <div class="stat-num" style="color:var(--mint);">$${inc.toLocaleString('es-CO')}</div>
+          <div class="stat-num" style="color:var(--mint);">${_FIN_FMT(inc)}</div>
           <div class="stat-label">Ingresos</div>
         </div>
         <div class="stat-item">
-          <div class="stat-num" style="color:var(--rose-light);">$${exp.toLocaleString('es-CO')}</div>
+          <div class="stat-num" style="color:var(--rose-light);">${_FIN_FMT(exp)}</div>
           <div class="stat-label">Gastos</div>
         </div>
       </div>
@@ -2695,49 +2814,32 @@ function _renderFinance() {
     <div class="fin-tabs">
       <div class="fin-tab-btn active" data-fin="registrar">💳 Registrar</div>
       <div class="fin-tab-btn" data-fin="historial">📋 Historial</div>
+      <div class="fin-tab-btn" data-fin="presupuestos">📊 Presup.</div>
       <div class="fin-tab-btn" data-fin="metas">🎯 Metas</div>
       <div class="fin-tab-btn" data-fin="deudas">💸 Deudas</div>
+      <div class="fin-tab-btn" data-fin="recurrentes">🔄 Recurrentes</div>
+      <div class="fin-tab-btn" data-fin="reportes">📈 Reportes</div>
+      <div class="fin-tab-btn" data-fin="logros">🏆 Logros</div>
+      <div class="fin-tab-btn" data-fin="herramientas">🛠️ Tools</div>
     </div>
 
     <!-- Panel: Registrar -->
     <div class="fin-panel active" id="fin-registrar">
-      <div class="card anim-in anim-in-d1">
-        <div class="card-title"><span class="card-title-icon">➕</span> Nuevo movimiento</div>
+      <div class="card anim-in">
+        <div class="card-title"><span class="card-title-icon">➕</span> Nueva transacción</div>
         <div class="col">
           <div class="row">
-            <select class="input" id="fn-type">
+            <select class="input" id="fn-type" onchange="_finUpdateCats()">
               <option value="income">💚 Ingreso</option>
               <option value="expense">🔴 Gasto</option>
             </select>
-            <select class="input" id="fn-cat">
-              <option>🍔 Comida</option>
-              <option>🚌 Transporte</option>
-              <option>📚 Universidad</option>
-              <option>👗 Ropa</option>
-              <option>💊 Salud</option>
-              <option>🎮 Entretenimiento</option>
-              <option>🏠 Servicios</option>
-              <option>💕 Pareja</option>
-              <option>💼 Ingreso/Trabajo</option>
-              <option>🚀 Emprendimiento</option>
-              <option>🎁 Otro</option>
-            </select>
+            <select class="input" id="fn-cat"></select>
           </div>
           <input type="number" class="input" id="fn-amount" placeholder="Monto ($)" inputmode="numeric"/>
           <input type="text" class="input" id="fn-desc" placeholder="Descripción"/>
-          <button class="btn btn-primary btn-full" id="btn-add-tx">Agregar movimiento</button>
-        </div>
-      </div>
-      <!-- Split calculator -->
-      <div class="card anim-in anim-in-d2">
-        <div class="card-title"><span class="card-title-icon">➗</span> Dividir cuenta</div>
-        <div class="col">
-          <div class="row">
-            <input type="number" class="input" id="sp-total" placeholder="Total ($)" inputmode="numeric"/>
-            <input type="number" class="input" id="sp-persons" placeholder="Personas" value="2" inputmode="numeric"/>
-          </div>
-          <button class="btn btn-ghost btn-full" id="btn-split">Calcular</button>
-          <div id="split-result" style="text-align:center;font-family:var(--font-display);font-size:24px;color:var(--rose-light);display:none;padding:8px 0;"></div>
+          <input type="date" class="input" id="fn-date"/>
+          <input type="text" class="input" id="fn-notes" placeholder="Notas (opcional)"/>
+          <button class="btn btn-primary btn-full" id="btn-add-tx">Agregar transacción</button>
         </div>
       </div>
     </div>
@@ -2745,22 +2847,55 @@ function _renderFinance() {
     <!-- Panel: Historial -->
     <div class="fin-panel" id="fin-historial">
       <div class="card">
-        <div class="card-title"><span class="card-title-icon">📋</span> Últimos movimientos</div>
+        <div class="card-title"><span class="card-title-icon">📋</span> Historial de movimientos</div>
+        <div class="row" style="margin-bottom:12px;gap:7px;">
+          <select class="input" id="hist-filter-type" style="font-size:12px;" onchange="_renderHistorial()">
+            <option value="">Todos</option>
+            <option value="income">💚 Ingresos</option>
+            <option value="expense">🔴 Gastos</option>
+          </select>
+          <select class="input" id="hist-filter-cat" style="font-size:12px;" onchange="_renderHistorial()">
+            <option value="">Todas las categorías</option>
+          </select>
+        </div>
         <div id="fin-hist-list"></div>
       </div>
+    </div>
+
+    <!-- Panel: Presupuestos -->
+    <div class="fin-panel" id="fin-presupuestos">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">📊</span> Nuevo presupuesto</div>
+        <div class="col">
+          <select class="input" id="bud-cat"></select>
+          <div class="row">
+            <input type="number" class="input" id="bud-limit" placeholder="Límite ($)" inputmode="numeric"/>
+            <select class="input" id="bud-period">
+              <option value="monthly">Mensual</option>
+              <option value="weekly">Semanal</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-full" id="btn-add-bud">Crear presupuesto</button>
+        </div>
+      </div>
+      <div id="budgets-list"></div>
     </div>
 
     <!-- Panel: Metas -->
     <div class="fin-panel" id="fin-metas">
       <div class="card">
-        <div class="card-title"><span class="card-title-icon">🎯</span> Nueva meta</div>
+        <div class="card-title"><span class="card-title-icon">🎯</span> Nueva meta de ahorro</div>
         <div class="col">
-          <input type="text" class="input" id="gn-name" placeholder="¿Para qué estás ahorrando?"/>
+          <div class="row">
+            <input type="text" class="input" id="gn-emoji" placeholder="🎯" style="flex:0;width:60px;text-align:center;"/>
+            <input type="text" class="input" id="gn-name" placeholder="¿Para qué estás ahorrando?"/>
+          </div>
           <div class="row">
             <input type="number" class="input" id="gn-target" placeholder="Meta ($)" inputmode="numeric"/>
             <input type="number" class="input" id="gn-curr" placeholder="Ya tengo ($)" inputmode="numeric"/>
           </div>
-          <button class="btn btn-primary btn-full" id="btn-add-goal">Crear meta</button>
+          <input type="date" class="input" id="gn-deadline" placeholder="Fecha límite (opcional)"/>
+          <button class="btn btn-primary btn-full" id="btn-add-goal">Crear meta 🎯</button>
         </div>
       </div>
       <div id="goals-list"></div>
@@ -2772,19 +2907,108 @@ function _renderFinance() {
         <div class="card-title"><span class="card-title-icon">💸</span> Nueva deuda</div>
         <div class="col">
           <div class="row">
-            <input type="text" class="input" id="dn-name" placeholder="¿Quién?" style="flex:2;"/>
-            <select class="input" id="dn-type">
-              <option value="owe">Debo</option>
-              <option value="owed">Me deben</option>
-            </select>
+            <input type="text" class="input" id="dn-name" placeholder="Nombre (ej: Tarjeta Visa)" style="flex:2;"/>
+            <input type="text" class="input" id="dn-lender" placeholder="Acreedor" style="flex:1;"/>
           </div>
-          <input type="number" class="input" id="dn-amount" placeholder="Monto ($)" inputmode="numeric"/>
-          <button class="btn btn-primary btn-full" id="btn-add-debt">Agregar</button>
+          <select class="input" id="dn-type">
+            <option value="tarjeta">💳 Tarjeta de crédito</option>
+            <option value="prestamo">🤝 Préstamo personal</option>
+            <option value="hipoteca">🏠 Hipoteca</option>
+            <option value="otro">🌟 Otro</option>
+          </select>
+          <div class="row">
+            <input type="number" class="input" id="dn-total" placeholder="Deuda total ($)" inputmode="numeric"/>
+            <input type="number" class="input" id="dn-remaining" placeholder="Saldo restante ($)" inputmode="numeric"/>
+          </div>
+          <div class="row">
+            <input type="number" class="input" id="dn-rate" placeholder="Tasa interés % (opcional)" inputmode="decimal"/>
+            <input type="number" class="input" id="dn-mpay" placeholder="Cuota mensual ($)" inputmode="numeric"/>
+          </div>
+          <input type="date" class="input" id="dn-due" placeholder="Fecha vencimiento"/>
+          <input type="text" class="input" id="dn-notes" placeholder="Notas (opcional)"/>
+          <button class="btn btn-primary btn-full" id="btn-add-debt">Agregar deuda</button>
         </div>
       </div>
       <div id="debts-list"></div>
     </div>
+
+    <!-- Panel: Recurrentes -->
+    <div class="fin-panel" id="fin-recurrentes">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🔄</span> Nuevo gasto recurrente</div>
+        <div class="col">
+          <input type="text" class="input" id="rec-name" placeholder="Nombre (ej: Netflix, arriendo)"/>
+          <div class="row">
+            <input type="number" class="input" id="rec-amt" placeholder="Monto ($)" inputmode="numeric"/>
+            <input type="number" class="input" id="rec-day" placeholder="Día del mes" min="1" max="31" inputmode="numeric"/>
+          </div>
+          <select class="input" id="rec-cat"></select>
+          <input type="text" class="input" id="rec-notes" placeholder="Notas (opcional)"/>
+          <button class="btn btn-primary btn-full" id="btn-add-rec">Agregar recurrente</button>
+        </div>
+      </div>
+      <div id="recurring-list"></div>
+    </div>
+
+    <!-- Panel: Reportes -->
+    <div class="fin-panel" id="fin-reportes">
+      <div id="fin-rep-content"></div>
+    </div>
+
+    <!-- Panel: Logros -->
+    <div class="fin-panel" id="fin-logros">
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🏆</span> Tus logros financieros</div>
+        <div class="progress-track" style="margin-bottom:6px;"><div class="progress-fill" id="ach-bar" style="width:0%"></div></div>
+        <div style="font-size:11px;color:var(--cream-mute);margin-bottom:14px;" id="ach-lbl"></div>
+        <div id="ach-list"></div>
+      </div>
+    </div>
+
+    <!-- Panel: Herramientas -->
+    <div class="fin-panel" id="fin-herramientas">
+      <!-- Dividir cuenta -->
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">➗</span> Dividir cuenta</div>
+        <div class="col">
+          <div class="row">
+            <input type="number" class="input" id="sp-total" placeholder="Total ($)" inputmode="numeric"/>
+            <input type="number" class="input" id="sp-persons" placeholder="Personas" value="2" inputmode="numeric"/>
+            <input type="number" class="input" id="sp-tip" placeholder="Propina %" value="0" inputmode="numeric"/>
+          </div>
+          <button class="btn btn-ghost btn-full" onclick="_finRunSplit()">Calcular ➗</button>
+          <div id="split-result" style="display:none;"></div>
+        </div>
+      </div>
+      <!-- Simulador de crédito -->
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🔢</span> Simulador de crédito</div>
+        <div class="col">
+          <input type="number" class="input" id="sim-amt" placeholder="Monto del crédito ($)" inputmode="numeric"/>
+          <div class="row">
+            <input type="number" class="input" id="sim-rate" placeholder="Tasa interés % anual" inputmode="decimal"/>
+            <input type="number" class="input" id="sim-months" placeholder="Plazo (meses)" inputmode="numeric"/>
+          </div>
+          <button class="btn btn-ghost btn-full" onclick="_finRunSim()">Simular 📊</button>
+          <div id="sim-result"></div>
+        </div>
+      </div>
+      <!-- Exportar -->
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">💾</span> Exportar datos</div>
+        <button class="btn btn-ghost btn-full" onclick="_finExport()">Descargar JSON 💾</button>
+      </div>
+    </div>
   `;
+
+  // Populate category selects
+  _finUpdateCats();
+  document.getElementById('bud-cat').innerHTML = EXP_CATS_FIN.map(c => `<option value="${c}">${c}</option>`).join('');
+  document.getElementById('rec-cat').innerHTML = EXP_CATS_FIN.map(c => `<option value="${c}">${c}</option>`).join('');
+
+  // Set today's date
+  const todayISO = new Date().toISOString().split('T')[0];
+  document.getElementById('fn-date').value = todayISO;
 
   // Tab switching
   document.querySelectorAll('.fin-tab-btn').forEach(btn => {
@@ -2793,212 +3017,615 @@ function _renderFinance() {
       document.querySelectorAll('.fin-panel').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById('fin-' + btn.dataset.fin).classList.add('active');
-      if (btn.dataset.fin === 'historial') _renderHistorial();
-      if (btn.dataset.fin === 'metas') _renderGoals();
-      if (btn.dataset.fin === 'deudas') _renderDebts();
+      const t = btn.dataset.fin;
+      if (t === 'historial')    { _finPopulateHistCats(); _renderHistorial(); }
+      if (t === 'presupuestos') _renderBudgets();
+      if (t === 'metas')        _renderGoals();
+      if (t === 'deudas')       _renderDebts();
+      if (t === 'recurrentes')  _renderRecurring();
+      if (t === 'reportes')     _renderReports();
+      if (t === 'logros')       _renderAchievements();
     });
   });
 
   // Add transaction
-  document.getElementById('btn-add-tx').addEventListener('click', () => {
-    const tp  = document.getElementById('fn-type').value;
-    const cat = document.getElementById('fn-cat').value;
-    const am  = parseFloat(document.getElementById('fn-amount').value);
-    const desc= document.getElementById('fn-desc').value.trim();
-    if (!am || !desc) { showToast('Completa monto y descripción'); return; }
-    const txs = G('tt_tx', []);
-    txs.push({ tp, cat, am, desc, date: new Date().toLocaleDateString('es-CO') });
-    S('tt_tx', txs);
-    document.getElementById('fn-amount').value = '';
-    document.getElementById('fn-desc').value   = '';
-    showToast(tp==='income' ? '💚 Ingreso agregado' : '🔴 Gasto agregado');
-    _renderFinance(); // refresh totals
-  });
+  document.getElementById('btn-add-tx').addEventListener('click', _finAddTx);
 
-  // Split
-  document.getElementById('btn-split').addEventListener('click', () => {
-    const total = parseFloat(document.getElementById('sp-total').value) || 0;
-    const pers  = parseInt(document.getElementById('sp-persons').value) || 2;
-    const res   = document.getElementById('split-result');
-    res.textContent = '$' + (total / pers).toLocaleString('es-CO', { maximumFractionDigits:0 }) + ' c/u';
-    res.style.display = 'block';
-  });
+  // Add budget
+  document.getElementById('btn-add-bud').addEventListener('click', _finAddBudget);
 
   // Add goal
-  document.getElementById('btn-add-goal').addEventListener('click', () => {
-    const n = document.getElementById('gn-name').value.trim();
-    const t = parseFloat(document.getElementById('gn-target').value) || 0;
-    const c = parseFloat(document.getElementById('gn-curr').value) || 0;
-    if (!n || !t) { showToast('Ingresa nombre y meta'); return; }
-    const goals = G('tt_goals', []);
-    goals.push({ n, t, curr:c, hist:[] });
-    S('tt_goals', goals);
-    document.getElementById('gn-name').value = '';
-    document.getElementById('gn-target').value = '';
-    document.getElementById('gn-curr').value = '';
-    _renderGoals();
-    showToast('🎯 Meta creada');
-  });
+  document.getElementById('btn-add-goal').addEventListener('click', _finAddGoal);
 
   // Add debt
-  document.getElementById('btn-add-debt').addEventListener('click', () => {
-    const name = document.getElementById('dn-name').value.trim();
-    const am   = parseFloat(document.getElementById('dn-amount').value) || 0;
-    const type = document.getElementById('dn-type').value;
-    if (!name || !am) { showToast('Completa todos los campos'); return; }
-    const debts = G('tt_debts', []);
-    debts.push({ n:name, orig:am, a:am, t:type, hist:[] });
-    S('tt_debts', debts);
-    document.getElementById('dn-name').value = '';
-    document.getElementById('dn-amount').value = '';
-    _renderDebts();
-    showToast('💸 Deuda agregada');
-  });
+  document.getElementById('btn-add-debt').addEventListener('click', _finAddDebt);
+
+  // Add recurring
+  document.getElementById('btn-add-rec').addEventListener('click', _finAddRec);
 }
 
-/* ─ Historial ─ */
-function _renderHistorial() {
-  const el = document.getElementById('fin-hist-list');
-  if (!el) return;
-  const txs = [...G('tt_tx', [])].reverse().slice(0, 25);
-  if (!txs.length) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">💰</div><div class="empty-state-text">Sin movimientos aún</div></div>`;
-    return;
-  }
-  const allTxs = G('tt_tx', []);
-  el.innerHTML = txs.map((t, i) => {
-    const realIdx = allTxs.length - 1 - i;
-    const cat = t.cat || '🎁';
-    return `<div class="tx-item">
-      <div class="tx-icon ${t.tp}">${cat.split(' ')[0]}</div>
-      <div class="tx-info">
-        <div class="tx-desc">${t.desc}</div>
-        <div class="tx-cat">${cat} · ${t.date}</div>
-      </div>
-      <div class="tx-amount ${t.tp}">$${t.am.toLocaleString('es-CO')}</div>
-      <span class="tx-del" data-idx="${realIdx}" onclick="_delTx(${realIdx})">×</span>
-    </div>`;
-  }).join('');
+// ── Called by onTabShown ──
+function renderFinance() { _renderFinance(); }
+
+/* ════════════════════════════════════════
+   TRANSACTIONS
+   ════════════════════════════════════════ */
+function _finUpdateCats() {
+  const tp = document.getElementById('fn-type')?.value || 'expense';
+  const cats = tp === 'income' ? INC_CATS_FIN : EXP_CATS_FIN;
+  const el = document.getElementById('fn-cat');
+  if (el) el.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
 }
 
-function _delTx(i) {
-  if (!confirm('¿Eliminar este movimiento?')) return;
-  const txs = G('tt_tx', []);
-  txs.splice(i, 1);
-  S('tt_tx', txs);
+function _finAddTx() {
+  const tp   = document.getElementById('fn-type').value;
+  const cat  = document.getElementById('fn-cat').value;
+  const am   = parseFloat(document.getElementById('fn-amount').value) || 0;
+  const desc = document.getElementById('fn-desc').value.trim();
+  const date = document.getElementById('fn-date').value || new Date().toISOString().split('T')[0];
+  const notes= document.getElementById('fn-notes').value.trim();
+  if (!am || !desc) { showToast('Completa monto y descripción'); return; }
+  const txs = _fGet('tx');
+  txs.push({ id: _FIN_UID(), tp, cat, am, desc, date, notes, ts: Date.now() });
+  _fSet('tx', txs);
+  document.getElementById('fn-amount').value = '';
+  document.getElementById('fn-desc').value   = '';
+  document.getElementById('fn-notes').value  = '';
+  showToast(tp === 'income' ? '💚 Ingreso agregado' : '🔴 Gasto agregado');
   _renderFinance();
 }
 
-/* ─ Goals ─ */
+function _finDelTx(id) {
+  if (!confirm('¿Eliminar este movimiento?')) return;
+  const txs = _fGet('tx').filter(t => t.id !== id);
+  _fSet('tx', txs);
+  _renderFinance();
+}
+
+function _finPopulateHistCats() {
+  const txs = _fGet('tx');
+  const cats = [...new Set(txs.map(t => t.cat))].filter(Boolean);
+  const el = document.getElementById('hist-filter-cat');
+  if (!el) return;
+  el.innerHTML = '<option value="">Todas las categorías</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+function _renderHistorial() {
+  const el = document.getElementById('fin-hist-list');
+  if (!el) return;
+  const typeF = document.getElementById('hist-filter-type')?.value || '';
+  const catF  = document.getElementById('hist-filter-cat')?.value  || '';
+  let txs = [..._fGet('tx')].sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  if (typeF) txs = txs.filter(t => t.tp === typeF);
+  if (catF)  txs = txs.filter(t => t.cat === catF);
+  if (!txs.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">💰</div><div class="empty-state-text">Sin movimientos</div></div>`;
+    return;
+  }
+  el.innerHTML = txs.map(t => {
+    const catIcon = (t.cat || '🌟').split(' ')[0];
+    const dateStr = t.date ? new Date(t.date + 'T12:00:00').toLocaleDateString('es-CO', {day:'2-digit',month:'short'}) : '';
+    return `<div class="tx-item">
+      <div class="tx-icon ${t.tp}">${catIcon}</div>
+      <div class="tx-info">
+        <div class="tx-desc">${t.desc}</div>
+        <div class="tx-cat">${t.cat || ''} · ${dateStr}</div>
+      </div>
+      <div class="tx-amount ${t.tp}">${_FIN_FMT(t.am)}</div>
+      <span class="tx-del" onclick="_finDelTx('${t.id}')">×</span>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════
+   PRESUPUESTOS
+   ════════════════════════════════════════ */
+function _finAddBudget() {
+  const cat    = document.getElementById('bud-cat').value;
+  const limit  = parseFloat(document.getElementById('bud-limit').value) || 0;
+  const period = document.getElementById('bud-period').value;
+  if (!limit) { showToast('Ingresa un límite'); return; }
+  const buds = _fGet('budgets');
+  buds.push({ id: _FIN_UID(), cat, limit, period });
+  _fSet('budgets', buds);
+  document.getElementById('bud-limit').value = '';
+  showToast('📊 Presupuesto creado');
+  _renderBudgets();
+}
+
+function _finDelBudget(id) {
+  if (!confirm('¿Eliminar presupuesto?')) return;
+  _fSet('budgets', _fGet('budgets').filter(b => b.id !== id));
+  _renderBudgets();
+}
+
+function _renderBudgets() {
+  const el = document.getElementById('budgets-list');
+  if (!el) return;
+  const buds = _fGet('budgets');
+  if (!buds.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📊</div><div class="empty-state-text">Sin presupuestos aún.<br>Crea límites por categoría.</div></div>`;
+    return;
+  }
+  const m = _FIN_CM();
+  el.innerHTML = buds.map(b => {
+    const txs = _fGet('tx');
+    const spent = txs.filter(t => t.tp === 'expense' && t.cat === b.cat && _FIN_MK(t.date) === m).reduce((s, t) => s + (t.am || 0), 0);
+    const pct = b.limit > 0 ? Math.round((spent / b.limit) * 100) : 0;
+    const col = pct < 80 ? '' : pct < 100 ? 'y' : 'r';
+    return `<div class="bud-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="font-size:13px;font-weight:600;">${b.cat}</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span style="font-size:10px;color:var(--cream-mute);">${b.period === 'monthly' ? 'Mensual' : 'Semanal'}</span>
+          <span onclick="_finDelBudget('${b.id}')" style="color:rgba(240,106,106,0.4);cursor:pointer;font-size:16px;padding:2px;">×</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--cream-mute);margin-bottom:6px;">
+        <span>Gastado: <strong style="color:var(--cream);">${_FIN_FMT(spent)}</strong></span>
+        <span>Límite: ${_FIN_FMT(b.limit)}</span>
+      </div>
+      <div class="fin-pw"><div class="fin-pb ${col}" style="width:${Math.min(pct, 100)}%"></div></div>
+      <div style="font-size:11px;color:var(--cream-mute);">${pct}% ${pct >= 100 ? '⚠️ Excedido' : pct >= 80 ? '⚠️ Cerca del límite' : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════
+   METAS DE AHORRO
+   ════════════════════════════════════════ */
+function _finAddGoal() {
+  const name    = document.getElementById('gn-name').value.trim();
+  const emoji   = document.getElementById('gn-emoji').value.trim() || '🎯';
+  const target  = parseFloat(document.getElementById('gn-target').value) || 0;
+  const curr    = parseFloat(document.getElementById('gn-curr').value) || 0;
+  const deadline= document.getElementById('gn-deadline').value;
+  if (!name || !target) { showToast('Ingresa nombre y monto objetivo'); return; }
+  const goals = _fGet('goals');
+  goals.push({ id: _FIN_UID(), name, emoji, target, curr, deadline });
+  _fSet('goals', goals);
+  document.getElementById('gn-name').value    = '';
+  document.getElementById('gn-emoji').value   = '';
+  document.getElementById('gn-target').value  = '';
+  document.getElementById('gn-curr').value    = '';
+  document.getElementById('gn-deadline').value= '';
+  showToast('🎯 Meta creada');
+  _renderGoals();
+}
+
+function _finAbonarGoal(id) {
+  const goals = _fGet('goals');
+  const g = goals.find(x => x.id === id);
+  if (!g) return;
+  const v = parseFloat(document.getElementById('ga-' + id).value) || 0;
+  if (!v) return;
+  g.curr = Math.min(g.target, (g.curr || 0) + v);
+  _fSet('goals', goals);
+  // Register as a transaction expense
+  const txs = _fGet('tx');
+  txs.push({ id: _FIN_UID(), tp: 'expense', cat: '🎯 Metas', am: v, desc: `Ahorro: ${g.name}`, date: new Date().toISOString().split('T')[0], ts: Date.now() });
+  _fSet('tx', txs);
+  showToast(`💰 ${_FIN_FMT(v)} agregado a "${g.name}"`);
+  _renderGoals();
+  _renderFinance();
+}
+
+function _finDelGoal(id) {
+  if (!confirm('¿Eliminar esta meta?')) return;
+  _fSet('goals', _fGet('goals').filter(g => g.id !== id));
+  _renderGoals();
+}
+
 function _renderGoals() {
   const el = document.getElementById('goals-list');
   if (!el) return;
-  const goals = G('tt_goals', []);
+  const goals = _fGet('goals');
   if (!goals.length) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🎯</div><div class="empty-state-text">Sin metas aún.<br>¡Agrega tu primera meta de ahorro!</div></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🎯</div><div class="empty-state-text">Sin metas aún.<br>¡Define tu primera meta de ahorro!</div></div>`;
     return;
   }
-  el.innerHTML = goals.map((g, i) => {
-    const pct = g.t > 0 ? Math.min(g.curr / g.t * 100, 100) : 0;
-    const falta = Math.max(0, g.t - g.curr);
-    const color = pct >= 100 ? 'var(--mint)' : pct >= 60 ? 'var(--gold)' : 'var(--rose-light)';
+  el.innerHTML = goals.map(g => {
+    const pct   = g.target > 0 ? Math.min(Math.round((g.curr / g.target) * 100), 100) : 0;
+    const falta = Math.max(0, g.target - g.curr);
+    const done  = g.curr >= g.target;
+    const dl    = g.deadline ? Math.ceil((new Date(g.deadline + 'T12:00:00') - Date.now()) / 86400000) : null;
+    const col   = done ? 'var(--mint)' : pct >= 60 ? 'var(--gold)' : 'var(--rose-light)';
     return `<div class="goal-card anim-in">
       <div class="goal-header">
-        <div class="goal-name">${g.n}</div>
-        <div class="goal-pct" style="color:${color}">${pct.toFixed(0)}%</div>
+        <div class="goal-name">${g.emoji || '🎯'} ${g.name}</div>
+        <div class="goal-pct" style="color:${col}">${pct}%</div>
       </div>
       <div class="goal-amounts">
-        <span>Ahorrado: <strong style="color:var(--mint)">$${g.curr.toLocaleString('es-CO')}</strong></span>
-        <span>Meta: <strong>$${g.t.toLocaleString('es-CO')}</strong></span>
+        <span>Ahorrado: <strong style="color:var(--mint);">${_FIN_FMT(g.curr)}</strong></span>
+        <span>Meta: <strong>${_FIN_FMT(g.target)}</strong></span>
       </div>
-      <div class="progress-track" style="margin-bottom:10px;">
-        <div class="progress-fill" style="width:${pct}%;background:linear-gradient(90deg,${color},var(--plum-light));"></div>
-      </div>
+      <div class="fin-pw"><div class="fin-pb g" style="width:${pct}%;background:linear-gradient(90deg,${col},var(--plum-light));"></div></div>
       <div style="font-size:11px;color:var(--cream-mute);margin-bottom:10px;">
-        ${pct>=100 ? '🎉 ¡Meta alcanzada!' : `Falta $${falta.toLocaleString('es-CO')}`}
+        ${done ? '🎉 ¡Meta alcanzada!' : `Falta ${_FIN_FMT(falta)}`}
+        ${dl !== null ? ` · ${dl > 0 ? dl + ' días' : '¡Hoy!'}` : ''}
       </div>
-      <div class="row">
-        <input type="number" class="input" id="ga-${i}" placeholder="Abonar $" inputmode="numeric" style="font-size:12px;padding:8px 12px;"/>
-        <button class="btn btn-rose-ghost btn-sm" onclick="_addToGoal(${i})" style="flex:0;white-space:nowrap;">+ Abonar</button>
-        <button class="btn btn-danger-ghost btn-sm" onclick="_delGoal(${i})" style="flex:0;">×</button>
-      </div>
+      ${!done ? `
+        <div class="row">
+          <input type="number" class="input" id="ga-${g.id}" placeholder="Abonar $" inputmode="numeric" style="font-size:12px;padding:8px 12px;"/>
+          <button class="btn btn-rose-ghost btn-sm" onclick="_finAbonarGoal('${g.id}')" style="flex:0;white-space:nowrap;">+ Abonar</button>
+          <button class="btn btn-danger-ghost btn-sm" onclick="_finDelGoal('${g.id}')" style="flex:0;">×</button>
+        </div>` : `
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:12px;color:var(--mint);font-weight:600;">🎉 ¡Meta completada!</div>
+          <button class="btn btn-danger-ghost btn-sm" onclick="_finDelGoal('${g.id}')">×</button>
+        </div>`}
     </div>`;
   }).join('');
 }
 
-function _addToGoal(i) {
-  const v = parseFloat(document.getElementById('ga-' + i).value) || 0;
+/* ════════════════════════════════════════
+   DEUDAS
+   ════════════════════════════════════════ */
+function _finAddDebt() {
+  const name      = document.getElementById('dn-name').value.trim();
+  const lender    = document.getElementById('dn-lender').value.trim();
+  const type      = document.getElementById('dn-type').value;
+  const total     = parseFloat(document.getElementById('dn-total').value) || 0;
+  const remaining = parseFloat(document.getElementById('dn-remaining').value) || total;
+  const rate      = parseFloat(document.getElementById('dn-rate').value) || 0;
+  const mpay      = parseFloat(document.getElementById('dn-mpay').value) || 0;
+  const due       = document.getElementById('dn-due').value;
+  const notes     = document.getElementById('dn-notes').value.trim();
+  if (!name || !total) { showToast('Ingresa nombre y monto total'); return; }
+  const debts = _fGet('debts');
+  debts.push({ id: _FIN_UID(), name, lender, type, total, remaining, interestRate: rate, monthlyPayment: mpay, dueDate: due, notes });
+  _fSet('debts', debts);
+  ['dn-name','dn-lender','dn-total','dn-remaining','dn-rate','dn-mpay','dn-due','dn-notes'].forEach(id => { document.getElementById(id).value = ''; });
+  showToast('💸 Deuda agregada');
+  _renderDebts();
+}
+
+function _finAbonarDebt(id) {
+  const debts = _fGet('debts');
+  const d = debts.find(x => x.id === id);
+  if (!d) return;
+  const v = parseFloat(document.getElementById('dp-' + id).value) || 0;
   if (!v) return;
-  const goals = G('tt_goals', []);
-  goals[i].curr = Math.min(goals[i].curr + v, goals[i].t);
-  if (!goals[i].hist) goals[i].hist = [];
-  goals[i].hist.push({ am:v, date:new Date().toLocaleDateString('es-CO') });
-  S('tt_goals', goals);
-  _renderGoals();
-  showToast(`💰 $${v.toLocaleString('es-CO')} abonados`);
+  const actualPay = Math.min(v, d.remaining);
+  d.remaining = Math.max(0, d.remaining - actualPay);
+  _fSet('debts', debts);
+  // Register as expense
+  const txs = _fGet('tx');
+  txs.push({ id: _FIN_UID(), tp: 'expense', cat: '💳 Deudas', am: actualPay, desc: `Pago: ${d.name}`, date: new Date().toISOString().split('T')[0], ts: Date.now() });
+  _fSet('tx', txs);
+  showToast(`💳 ${_FIN_FMT(actualPay)} pagado a "${d.name}"`);
+  _renderDebts();
+  _renderFinance();
 }
 
-function _delGoal(i) {
-  if (!confirm('¿Eliminar esta meta?')) return;
-  const goals = G('tt_goals', []);
-  goals.splice(i, 1);
-  S('tt_goals', goals);
-  _renderGoals();
+function _finDelDebt(id) {
+  if (!confirm('¿Eliminar esta deuda?')) return;
+  _fSet('debts', _fGet('debts').filter(d => d.id !== id));
+  _renderDebts();
 }
 
-/* ─ Debts ─ */
 function _renderDebts() {
   const el = document.getElementById('debts-list');
   if (!el) return;
-  const debts = G('tt_debts', []);
+  const debts = _fGet('debts');
   if (!debts.length) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">💸</div><div class="empty-state-text">Sin deudas registradas</div></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">💳</div><div class="empty-state-text">¡Genial! Sin deudas registradas</div></div>`;
     return;
   }
-  el.innerHTML = debts.map((d, i) => {
-    const pct = d.orig > 0 ? Math.min((1 - d.a/d.orig)*100, 100) : 0;
-    const isOwe = d.t === 'owe';
-    return `<div class="debt-card anim-in">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <span class="chip ${isOwe?'chip-red':'chip-green'}">${isOwe?'Debo':'Me deben'}</span>
-        <span style="font-size:14px;font-weight:600;flex:1;">${d.n}</span>
-        <span class="tx-del" onclick="_delDebt(${i})">×</span>
+  const totalDebt = debts.reduce((s, d) => s + (d.remaining || 0), 0);
+  el.innerHTML = `<div class="card" style="margin-bottom:10px;"><div style="font-size:12px;color:var(--cream-mute);">Deuda total</div><div style="font-family:var(--font-display);font-size:24px;font-weight:700;color:var(--danger);">${_FIN_FMT(totalDebt)}</div></div>` +
+    debts.map(d => {
+      const pct = d.total > 0 ? Math.round(((d.total - d.remaining) / d.total) * 100) : 0;
+      const mi  = d.remaining * ((d.interestRate || 0) / 100 / 12);
+      return `<div class="debt-card anim-in">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div>
+            <div style="font-size:14px;font-weight:700;">${d.name}</div>
+            <div style="font-size:11px;color:var(--cream-mute);">${d.lender || ''} · ${d.type}</div>
+          </div>
+          <span onclick="_finDelDebt('${d.id}')" style="color:rgba(240,106,106,0.4);cursor:pointer;font-size:18px;padding:2px;">×</span>
+        </div>
+        <div style="font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--danger);line-height:1;">${_FIN_FMT(d.remaining)}</div>
+        <div style="font-size:11px;color:var(--cream-mute);margin-bottom:8px;">de ${_FIN_FMT(d.total)} total</div>
+        <div class="fin-pw"><div class="fin-pb g" style="width:${pct}%"></div></div>
+        <div style="font-size:11px;color:var(--cream-mute);margin-bottom:8px;">${pct}% pagado</div>
+        ${d.interestRate ? `<div style="font-size:11px;color:var(--gold);margin-bottom:8px;">💰 Interés mensual: ${_FIN_FMT(Math.round(mi))}</div>` : ''}
+        ${d.dueDate ? `<div style="font-size:11px;color:var(--cream-mute);margin-bottom:8px;">📅 Vence: ${d.dueDate}</div>` : ''}
+        <div class="row">
+          <input type="number" class="input" id="dp-${d.id}" placeholder="Abonar $" inputmode="numeric" style="font-size:12px;padding:8px 12px;" value="${d.monthlyPayment || ''}"/>
+          <button class="btn btn-rose-ghost btn-sm" onclick="_finAbonarDebt('${d.id}')" style="flex:0;white-space:nowrap;">💳 Pagar</button>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+/* ════════════════════════════════════════
+   RECURRENTES
+   ════════════════════════════════════════ */
+function _finAddRec() {
+  const name  = document.getElementById('rec-name').value.trim();
+  const amt   = parseFloat(document.getElementById('rec-amt').value) || 0;
+  const day   = parseInt(document.getElementById('rec-day').value) || 1;
+  const cat   = document.getElementById('rec-cat').value;
+  const notes = document.getElementById('rec-notes').value.trim();
+  if (!name || !amt) { showToast('Ingresa nombre y monto'); return; }
+  const recs = _fGet('recurring');
+  recs.push({ id: _FIN_UID(), name, amt, day, cat, notes, fund: 0, paidThisMonth: false });
+  _fSet('recurring', recs);
+  ['rec-name','rec-amt','rec-day','rec-notes'].forEach(id => { document.getElementById(id).value = ''; });
+  showToast('🔄 Recurrente agregado');
+  _renderRecurring();
+}
+
+function _finFundRec(id) {
+  const recs = _fGet('recurring');
+  const r = recs.find(x => x.id === id);
+  if (!r) return;
+  const v = parseFloat(document.getElementById('rf-' + id).value) || 0;
+  if (!v) return;
+  r.fund = (r.fund || 0) + v;
+  _fSet('recurring', recs);
+  const txs = _fGet('tx');
+  txs.push({ id: _FIN_UID(), tp: 'expense', cat: '🔒 Fondo recurrente', am: v, desc: `Fondo: ${r.name}`, date: new Date().toISOString().split('T')[0], ts: Date.now() });
+  _fSet('tx', txs);
+  showToast(`💰 ${_FIN_FMT(v)} apartados para "${r.name}"`);
+  _renderRecurring();
+  _renderFinance();
+}
+
+function _finPayRec(id) {
+  const recs = _fGet('recurring');
+  const r = recs.find(x => x.id === id);
+  if (!r) return;
+  if ((r.fund || 0) < r.amt) { showToast(`⚠️ Fondo insuficiente. Tienes ${_FIN_FMT(r.fund || 0)} de ${_FIN_FMT(r.amt)}`); return; }
+  r.fund = (r.fund || 0) - r.amt;
+  r.paidThisMonth = true;
+  _fSet('recurring', recs);
+  const txs = _fGet('tx');
+  txs.push({ id: _FIN_UID(), tp: 'expense', cat: r.cat, am: r.amt, desc: r.name, date: new Date().toISOString().split('T')[0], ts: Date.now() });
+  _fSet('tx', txs);
+  showToast(`✅ Pago de "${r.name}" registrado`);
+  _renderRecurring();
+  _renderFinance();
+}
+
+function _finDelRec(id) {
+  if (!confirm('¿Eliminar este recurrente?')) return;
+  _fSet('recurring', _fGet('recurring').filter(r => r.id !== id));
+  _renderRecurring();
+}
+
+function _renderRecurring() {
+  const el = document.getElementById('recurring-list');
+  if (!el) return;
+  const recs = _fGet('recurring');
+  if (!recs.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔄</div><div class="empty-state-text">Sin gastos recurrentes</div></div>`;
+    return;
+  }
+  const totalAmt = recs.reduce((s, r) => s + r.amt, 0);
+  el.innerHTML = `<div class="card" style="margin-bottom:10px;"><div style="font-size:12px;color:var(--cream-mute);">Total recurrentes / mes</div><div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--rose-light);">${_FIN_FMT(totalAmt)}</div></div>` +
+    recs.map(r => {
+      const pct = r.amt > 0 ? Math.min(Math.round(((r.fund || 0) / r.amt) * 100), 100) : 0;
+      return `<div class="rec-card anim-in">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div>
+            <div style="font-size:14px;font-weight:600;">${r.name}</div>
+            <div style="font-size:11px;color:var(--cream-mute);">${r.cat} · Día ${r.day}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            ${r.paidThisMonth ? '<span style="font-size:11px;color:var(--mint);">✅ Pagado</span>' : ''}
+            <span onclick="_finDelRec('${r.id}')" style="color:rgba(240,106,106,0.4);cursor:pointer;font-size:16px;padding:2px;">×</span>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;">
+          <span>Cuota: <strong>${_FIN_FMT(r.amt)}</strong></span>
+          <span style="color:var(--cream-mute);">Fondo: <strong style="color:var(--mint);">${_FIN_FMT(r.fund || 0)}</strong></span>
+        </div>
+        <div class="fin-pw"><div class="fin-pb" style="width:${pct}%"></div></div>
+        <div style="font-size:11px;color:var(--cream-mute);margin-bottom:10px;">${pct}% apartado</div>
+        <div class="row" style="gap:6px;">
+          <input type="number" class="input" id="rf-${r.id}" placeholder="Apartar $" inputmode="numeric" style="font-size:12px;padding:8px 10px;flex:2;"/>
+          <button class="btn btn-rose-ghost btn-sm" onclick="_finFundRec('${r.id}')" style="flex:0;white-space:nowrap;font-size:11px;">+ Apartar</button>
+          <button class="btn btn-primary btn-sm" onclick="_finPayRec('${r.id}')" style="flex:0;white-space:nowrap;font-size:11px;">Pagar ✅</button>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+/* ════════════════════════════════════════
+   REPORTES
+   ════════════════════════════════════════ */
+function _renderReports() {
+  const el = document.getElementById('fin-rep-content');
+  if (!el) return;
+  const txs  = _fGet('tx');
+  const real = txs.filter(t => t.cat !== '🔀 Transferencia');
+  const ti   = real.filter(t => t.tp === 'income').reduce((s, t) => s + (t.am || 0), 0);
+  const te   = real.filter(t => t.tp === 'expense').reduce((s, t) => s + (t.am || 0), 0);
+  const bal  = ti - te;
+  const sr   = ti > 0 ? Math.round(((ti - te) / ti) * 100) : 0;
+  const td   = _fGet('debts').reduce((s, d) => s + (d.remaining || 0), 0);
+  const ts   = _fGet('goals').reduce((s, g) => s + (g.curr || 0), 0);
+
+  // Category breakdown
+  const cats = {};
+  real.filter(t => t.tp === 'expense').forEach(t => { cats[t.cat] = (cats[t.cat] || 0) + (t.am || 0); });
+  const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+  const mx = sorted[0]?.[1] || 1;
+
+  // Monthly breakdown (last 6 months)
+  const monthlyData = {};
+  real.forEach(t => {
+    const mk = _FIN_MK(t.date);
+    if (!monthlyData[mk]) monthlyData[mk] = { inc: 0, exp: 0 };
+    if (t.tp === 'income') monthlyData[mk].inc += t.am || 0;
+    else monthlyData[mk].exp += t.am || 0;
+  });
+  const months = Object.keys(monthlyData).sort().slice(-6);
+
+  el.innerHTML = `
+    <!-- Resumen general -->
+    <div class="card anim-in">
+      <div class="card-title"><span class="card-title-icon">📈</span> Resumen general</div>
+      <div class="stat-grid">
+        <div class="stat-item"><div class="stat-num" style="color:var(--mint);">${_FIN_FMT(ti)}</div><div class="stat-label">Ingresos totales</div></div>
+        <div class="stat-item"><div class="stat-num" style="color:var(--rose-light);">${_FIN_FMT(te)}</div><div class="stat-label">Gastos totales</div></div>
+        <div class="stat-item"><div class="stat-num" style="color:${bal >= 0 ? 'var(--mint)' : 'var(--danger)'};">${_FIN_FMT(Math.abs(bal))}</div><div class="stat-label">${bal >= 0 ? 'Balance ✅' : 'Déficit ⚠️'}</div></div>
+        <div class="stat-item"><div class="stat-num" style="color:${sr >= 20 ? 'var(--mint)' : sr >= 10 ? 'var(--gold)' : 'var(--danger)'};">${sr}%</div><div class="stat-label">Tasa de ahorro</div></div>
+        <div class="stat-item"><div class="stat-num" style="color:var(--danger);">${_FIN_FMT(td)}</div><div class="stat-label">Deuda total</div></div>
+        <div class="stat-item"><div class="stat-num" style="color:var(--plum-light);">${_FIN_FMT(ts)}</div><div class="stat-label">Ahorros (metas)</div></div>
       </div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--cream-mute);margin-bottom:6px;">
-        <span>Saldo: <strong style="color:${isOwe?'var(--danger)':'var(--mint)'}">$${d.a.toLocaleString('es-CO')}</strong></span>
-        <span>Original: $${(d.orig||d.a).toLocaleString('es-CO')}</span>
+    </div>
+
+    <!-- Gastos por categoría -->
+    <div class="card anim-in">
+      <div class="card-title"><span class="card-title-icon">🏷️</span> Gastos por categoría</div>
+      ${sorted.length ? sorted.map(([cat, val]) => `
+        <div class="rep-bar-row">
+          <div class="rep-bar-lbl">${cat}</div>
+          <div class="rep-bar-track"><div class="rep-bar-fill" style="width:${Math.round((val / mx) * 100)}%"></div></div>
+          <div class="rep-bar-pct">${te > 0 ? Math.round((val / te) * 100) : 0}%</div>
+        </div>
+        <div style="font-size:10px;color:var(--cream-mute);text-align:right;margin-bottom:6px;">${_FIN_FMT(val)}</div>
+      `).join('') : '<div class="empty-state" style="padding:16px;"><div class="empty-state-text">Sin gastos registrados</div></div>'}
+    </div>
+
+    <!-- Historial mensual -->
+    <div class="card anim-in">
+      <div class="card-title"><span class="card-title-icon">📅</span> Últimos meses</div>
+      ${months.length ? months.reverse().map(m => {
+        const d = monthlyData[m];
+        const [y, mo] = m.split('-');
+        const label = new Date(parseInt(y), parseInt(mo) - 1, 1).toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+        const mb = d.inc - d.exp;
+        return `<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px;text-transform:capitalize;">${label}</div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;">
+            <span style="color:var(--mint);">▲ ${_FIN_FMT(d.inc)}</span>
+            <span style="color:var(--rose-light);">▼ ${_FIN_FMT(d.exp)}</span>
+            <span style="color:${mb >= 0 ? 'var(--mint)' : 'var(--danger)'};">${mb >= 0 ? '+' : ''}${_FIN_FMT(mb)}</span>
+          </div>
+        </div>`;
+      }).join('') : '<div class="empty-state" style="padding:16px;"><div class="empty-state-text">Sin datos aún</div></div>'}
+    </div>
+  `;
+}
+
+/* ════════════════════════════════════════
+   LOGROS
+   ════════════════════════════════════════ */
+const FIN_ACHS = [
+  { id: 'a1', icon: '🎉', name: 'Primera transacción', desc: 'Registraste tu primera transacción', fn: () => _fGet('tx').length >= 1 },
+  { id: 'a2', icon: '📊', name: '10 transacciones', desc: 'Llevas un historial serio', fn: () => _fGet('tx').length >= 10 },
+  { id: 'a3', icon: '📈', name: '50 transacciones', desc: 'Eres una experta en registros', fn: () => _fGet('tx').length >= 50 },
+  { id: 'a4', icon: '🎯', name: 'Primera meta', desc: 'Definiste una meta de ahorro', fn: () => _fGet('goals').length >= 1 },
+  { id: 'a5', icon: '🏅', name: 'Meta al 50%', desc: 'Alcanzaste el 50% de una meta', fn: () => _fGet('goals').some(g => g.target > 0 && (g.curr / g.target) >= 0.5) },
+  { id: 'a6', icon: '🏆', name: 'Meta completada', desc: '¡Completaste una meta de ahorro!', fn: () => _fGet('goals').some(g => g.target > 0 && g.curr >= g.target) },
+  { id: 'a7', icon: '💳', name: 'Deuda registrada', desc: 'Registraste una deuda para seguirla', fn: () => _fGet('debts').length >= 1 },
+  { id: 'a8', icon: '✅', name: 'Deuda saldada', desc: 'Pagaste completamente una deuda', fn: () => _fGet('debts').some(d => d.remaining === 0 && d.total > 0) },
+  { id: 'a9', icon: '💰', name: 'Presupuesto creado', desc: 'Creaste tu primer presupuesto', fn: () => _fGet('budgets').length >= 1 },
+  { id: 'a10', icon: '😊', name: 'Mes positivo', desc: 'Tus ingresos superaron tus gastos este mes', fn: () => {
+    const m = _FIN_CM();
+    const txs = _fGet('tx').filter(t => _FIN_MK(t.date) === m);
+    const i = txs.filter(t => t.tp === 'income').reduce((s, t) => s + (t.am || 0), 0);
+    const e = txs.filter(t => t.tp === 'expense').reduce((s, t) => s + (t.am || 0), 0);
+    return i > 0 && i > e;
+  }},
+  { id: 'a11', icon: '🔄', name: 'Organizada', desc: 'Creaste un gasto recurrente', fn: () => _fGet('recurring').length >= 1 },
+  { id: 'a12', icon: '💎', name: 'Ahorradora pro', desc: 'Tienes 3 metas de ahorro activas', fn: () => _fGet('goals').filter(g => g.curr < g.target).length >= 3 },
+];
+
+function _renderAchievements() {
+  const unlocked = FIN_ACHS.filter(a => a.fn());
+  const pct = Math.round((unlocked.length / FIN_ACHS.length) * 100);
+  const barEl = document.getElementById('ach-bar');
+  const lblEl = document.getElementById('ach-lbl');
+  const listEl = document.getElementById('ach-list');
+  if (barEl) barEl.style.width = pct + '%';
+  if (lblEl) lblEl.textContent = `${unlocked.length} / ${FIN_ACHS.length} logros (${pct}%)`;
+  if (listEl) listEl.innerHTML = FIN_ACHS.map(a => {
+    const u = a.fn();
+    return `<div class="ach-item ${u ? 'unl' : ''}">
+      <div style="font-size:24px;flex-shrink:0;">${a.icon}</div>
+      <div style="flex:1;">
+        <div class="ach-name" style="font-size:13px;font-weight:600;">${a.name}</div>
+        <div style="font-size:11px;color:var(--cream-mute);margin-top:2px;">${a.desc}</div>
       </div>
-      <div class="progress-track" style="margin-bottom:10px;">
-        <div class="progress-fill" style="width:${pct.toFixed(1)}%;background:linear-gradient(90deg,var(--mint),#00c97a);"></div>
-      </div>
-      <div style="font-size:11px;color:var(--cream-mute);margin-bottom:10px;">${pct.toFixed(0)}% pagado</div>
-      <div class="row">
-        <input type="number" class="input" id="da-${i}" placeholder="Abonar $" inputmode="numeric" style="font-size:12px;padding:8px 12px;"/>
-        <button class="btn btn-rose-ghost btn-sm" onclick="_abonarDebt(${i})" style="flex:0;white-space:nowrap;">Abonar</button>
-      </div>
+      <div style="font-size:11px;font-weight:600;color:${u ? 'var(--mint)' : 'var(--cream-mute)'};">${u ? '✅ Desbloqueado' : '🔒 Bloqueado'}</div>
     </div>`;
   }).join('');
 }
 
-function _abonarDebt(i) {
-  const v = parseFloat(document.getElementById('da-' + i).value) || 0;
-  if (!v) return;
-  const debts = G('tt_debts', []);
-  debts[i].a = Math.max(0, debts[i].a - v);
-  if (!debts[i].hist) debts[i].hist = [];
-  debts[i].hist.push({ am:v, date:new Date().toLocaleDateString('es-CO') });
-  S('tt_debts', debts);
-  _renderDebts();
-  showToast('💳 Abono registrado');
+/* ════════════════════════════════════════
+   HERRAMIENTAS
+   ════════════════════════════════════════ */
+function _finRunSplit() {
+  const total = parseFloat(document.getElementById('sp-total').value) || 0;
+  const ppl   = Math.max(1, parseInt(document.getElementById('sp-persons').value) || 1);
+  const tip   = parseFloat(document.getElementById('sp-tip').value) || 0;
+  const res   = document.getElementById('split-result');
+  if (!total) { res.style.display = 'none'; return; }
+  const wt  = total * (1 + tip / 100);
+  const pp  = wt / ppl;
+  res.style.display = 'block';
+  res.innerHTML = `
+    <div class="stat-grid" style="margin-top:10px;">
+      <div class="stat-item"><div class="stat-num">${_FIN_FMT(Math.round(pp))}</div><div class="stat-label">Por persona</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:var(--cream-mute);font-size:16px;">${_FIN_FMT(Math.round(wt))}</div><div class="stat-label">Total con propina ${tip}%</div></div>
+    </div>`;
 }
 
-function _delDebt(i) {
-  if (!confirm('¿Eliminar esta deuda?')) return;
-  const debts = G('tt_debts', []);
-  debts.splice(i, 1);
-  S('tt_debts', debts);
-  _renderDebts();
+function _finRunSim() {
+  const amt    = parseFloat(document.getElementById('sim-amt').value) || 0;
+  const rate   = parseFloat(document.getElementById('sim-rate').value) || 0;
+  const months = parseInt(document.getElementById('sim-months').value) || 0;
+  const res    = document.getElementById('sim-result');
+  if (!amt || !rate || !months) { res.innerHTML = '<div style="font-size:12px;color:var(--cream-mute);padding:8px 0;">Completa todos los campos</div>'; return; }
+  const mr     = rate / 100 / 12;
+  const pmt    = amt * (mr * Math.pow(1 + mr, months)) / (Math.pow(1 + mr, months) - 1);
+  const total  = pmt * months;
+  const interest = total - amt;
+  res.innerHTML = `
+    <div class="stat-grid" style="margin-top:10px;">
+      <div class="stat-item"><div class="stat-num" style="color:var(--rose-light);">${_FIN_FMT(Math.round(pmt))}</div><div class="stat-label">Cuota mensual</div></div>
+      <div class="stat-item"><div class="stat-num">${_FIN_FMT(Math.round(total))}</div><div class="stat-label">Total a pagar</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:var(--danger);">${_FIN_FMT(Math.round(interest))}</div><div class="stat-label">Total intereses</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:var(--gold);">${Math.round((interest / amt) * 100)}%</div><div class="stat-label">Costo del dinero</div></div>
+    </div>`;
 }
+
+function _finExport() {
+  const data = {
+    transactions: _fGet('tx'),
+    debts: _fGet('debts'),
+    goals: _fGet('goals'),
+    budgets: _fGet('budgets'),
+    recurring: _fGet('recurring'),
+    exportDate: new Date().toLocaleDateString('es-CO'),
+  };
+  const a = document.createElement('a');
+  a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
+  a.download = 'tuchituchi-finanzas.json';
+  a.click();
+  showToast('💾 Datos exportados');
+}
+
+// Expose globals for onclick
+window._finDelTx       = _finDelTx;
+window._finAbonarGoal  = _finAbonarGoal;
+window._finDelGoal     = _finDelGoal;
+window._finDelBudget   = _finDelBudget;
+window._finAbonarDebt  = _finAbonarDebt;
+window._finDelDebt     = _finDelDebt;
+window._finFundRec     = _finFundRec;
+window._finPayRec      = _finPayRec;
+window._finDelRec      = _finDelRec;
+window._finRunSplit    = _finRunSplit;
+window._finRunSim      = _finRunSim;
+window._finExport      = _finExport;
+window._finUpdateCats  = _finUpdateCats;
+window._renderHistorial= _renderHistorial;
 
 /* ══ day.js ══ */
 /* ════════════════════════════════════════
