@@ -1742,16 +1742,16 @@ let _cameraFacing= 'environment'; // back camera por defecto
    QUICK CHIPS — iconos del tema de la app
    ════════════════════════════════════════ */
 const QUICK_CHIPS = [
-  { icon:'💰', label:'Mis gastos',    q:'¿Cuánto he gastado y en qué categorías?' },
-  { icon:'✅', label:'Tareas',        q:'¿Qué tareas tengo pendientes hoy?' },
-  { icon:'✨', label:'Motivación',    q:'Dame una frase motivadora muy especial para mí' },
-  { icon:'🎯', label:'Mis metas',     q:'¿Cuánto he ahorrado y cuánto me falta en mis metas?' },
-  { icon:'📅', label:'Mi semana',     q:'Ayúdame a organizar y planear mi semana' },
-  { icon:'🌸', label:'Mi ciclo',      q:'¿En qué fase de mi ciclo menstrual estoy y qué me recomiendas?' },
-  { icon:'💧', label:'Agua',          q:'¿Cuántos vasos de agua llevo hoy? Anímame a tomar más' },
-  { icon:'💪', label:'Hábitos',       q:'¿Cómo van mis hábitos de hoy?' },
-  { icon:'📓', label:'Diario',        q:'Ayúdame a reflexionar sobre cómo me siento hoy' },
-  { icon:'🍽️', label:'Qué comer',    q:'Sugiéreme qué comer hoy con los ingredientes que tengo en casa, algo fácil y rico' },
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>`, label:'Mis gastos', q:'¿Cuánto he gastado y en qué categorías? Dame un resumen detallado con porcentajes y comparación con mis ingresos.' },
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>`, label:'Tareas', q:'¿Qué tareas tengo pendientes hoy? Organízalas por prioridad y dime cuáles son urgentes.' },
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`, label:'Motivación', q:'Dame una frase motivadora muy especial y personal para mí, basada en lo que sabes de mi vida.' },
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`, label:'Mis metas', q:'¿Cuánto he ahorrado en total y cuánto me falta para cada meta? ¿Cuánto tiempo me tomará alcanzarlas a este ritmo?' },
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`, label:'Mi semana', q:'Ayúdame a organizar y planear mi semana con base en mis tareas, hábitos y clases.' },
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`, label:'Mi ciclo', q:'¿En qué fase de mi ciclo menstrual estoy hoy? Dame consejos detallados para esta fase específica.' },
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 2C12 2 5 10.5 5 15a7 7 0 0014 0C19 10.5 12 2 12 2z"/></svg>`, label:'Agua', q:'¿Cuántos vasos de agua llevo hoy? Anímame a tomar más y dime los beneficios de mantenerme hidratada.' },
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`, label:'Hábitos', q:'¿Cómo van mis hábitos de hoy? ¿Cuáles llevo completados y cuáles me faltan?' },
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>`, label:'Diario', q:'Ayúdame a reflexionar sobre cómo me siento hoy con preguntas profundas e interesantes.' },
+  { svg:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>`, label:'Qué comer', q:'Sugiéreme qué comer hoy, algo fácil, rico y saludable. Dame receta con pasos simples.' }
 ];
 
 /* ════════════════════════════════════════
@@ -1775,7 +1775,7 @@ function _renderChat() {
       <div id="chat-quick-actions">
         ${QUICK_CHIPS.map(c =>
           `<div class="quick-chip" data-q="${c.q}">
-            <span class="quick-chip-icon">${c.icon}</span>${c.label}
+            <span class="quick-chip-icon" style="display:flex;align-items:center;color:var(--rose-light);">${c.svg}</span>${c.label}
           </div>`
         ).join('')}
       </div>
@@ -4655,7 +4655,218 @@ function _stopBreath(){clearTimeout(_brTimer);const c=document.getElementById('b
    CICLO
    ══════════════════════════════════════ */
 function _buildCycle(el){const cyc=G('tt_cyc',null);el.innerHTML+=`<div class="card"><div class="card-title"><span class="card-title-icon">⚙️</span> Configurar ciclo</div><div class="col"><div><label class="text-mute" style="font-size:12px;">Inicio último período</label><input type="date" class="input" id="cyc-s" value="${cyc?.s||''}" style="margin-top:6px;"/></div><div class="row"><div><label class="text-mute" style="font-size:12px;">Duración del ciclo</label><input type="number" class="input" id="cyc-l" value="${cyc?.l||28}" style="margin-top:6px;"/></div><div><label class="text-mute" style="font-size:12px;">Días de período</label><input type="number" class="input" id="cyc-pd" value="${cyc?.pd||5}" style="margin-top:6px;"/></div></div><button class="btn btn-primary btn-full" onclick="_calcCycle()">Calcular mi ciclo 🌸</button></div></div><div id="cycle-result"></div>`;if(cyc?.s)_calcCycle();}
-function _calcCycle(){const s=document.getElementById('cyc-s')?.value,l=parseInt(document.getElementById('cyc-l')?.value)||28,pd=parseInt(document.getElementById('cyc-pd')?.value)||5,el=document.getElementById('cycle-result');if(!s||!el)return;S('tt_cyc',{s,l,pd});try{const start=new Date(s+'T00:00:00');const today=new Date();today.setHours(0,0,0,0);let cs=new Date(start);while(true){const n=new Date(cs);n.setDate(n.getDate()+l);if(n>today)break;cs=n;}const day=Math.floor((today-cs)/86400000)+1;const ns=new Date(cs);ns.setDate(ns.getDate()+l);const dl=Math.ceil((ns-today)/86400000);const ov=l-14;const phases=[{name:'Período',emoji:'🔴',color:'var(--rose)',start:1,end:pd,tips:['🌡️ Bolsa de agua caliente para cólicos','🍫 Chocolate negro y plátano ayudan','😴 Descansa más de lo habitual','💊 Ibuprofeno 400mg si hay dolor fuerte','💧 Toma mucha agua e infusiones']},{name:'Folicular',emoji:'🌱',color:'var(--sky)',start:pd+1,end:ov-2,tips:['⚡ Tu energía sube día a día','💪 Ideal para ejercicio intenso','🧠 Capacidad cognitiva al máximo','✨ Tu piel luce más radiante','📚 Momento ideal para estudiar y memorizar']},{name:'Ovulación',emoji:'🥚',color:'var(--gold)',start:ov-2,end:ov+1,tips:['🌟 Estás en tu pico de energía','🗣️ Ideal para presentaciones y exámenes','💕 Mayor conexión emocional','🏆 Aprovecha para tus metas más difíciles']},{name:'Lútea',emoji:'🌙',color:'var(--plum-light)',start:ov+2,end:l,tips:['💜 Normal sentirte más sensible','🍎 Come carbohidratos complejos y magnesio','🛁 Baños calientes relajan el cuerpo','📓 Escribe cómo te sientes','🧘 Meditación y respiración profunda']}];const ph=phases.find(p=>day>=p.start&&day<=p.end)||phases[3];el.innerHTML=`<div class="card"><div style="text-align:center;margin-bottom:16px;"><div style="font-size:48px;margin-bottom:8px;">${ph.emoji}</div><div style="font-size:20px;font-weight:700;color:${ph.color};">${ph.name}</div><div style="font-size:13px;color:var(--cream-mute);margin-top:4px;">Día ${day} de ${l}</div></div><div class="stat-grid" style="margin-bottom:16px;"><div class="stat-item"><div class="stat-num">${dl}</div><div class="stat-label">Días al próximo período</div></div><div class="stat-item"><div class="stat-num">${day}</div><div class="stat-label">Día del ciclo actual</div></div></div><div class="section-label">💡 Consejos para esta fase</div>${ph.tips.map(t=>`<div class="list-row" style="padding:10px 0;font-size:13px;">${t}</div>`).join('')}</div>`;}catch(e){el.innerHTML='<p class="text-mute">Revisa las fechas e intenta de nuevo</p>';}}
+function _calcCycle() {
+  const s  = document.getElementById('cyc-s')?.value;
+  const l  = parseInt(document.getElementById('cyc-l')?.value) || 28;
+  const pd = parseInt(document.getElementById('cyc-pd')?.value) || 5;
+  const el = document.getElementById('cycle-result');
+  if (!s || !el) return;
+  S('tt_cyc', {s, l, pd});
+
+  try {
+    const start = new Date(s + 'T00:00:00');
+    const today = new Date(); today.setHours(0,0,0,0);
+    let cycStart = new Date(start);
+    while(true) { const n=new Date(cycStart); n.setDate(n.getDate()+l); if(n>today) break; cycStart=n; }
+    const day    = Math.floor((today - cycStart) / 86400000) + 1;
+    const nextStart = new Date(cycStart); nextStart.setDate(nextStart.getDate()+l);
+    const daysLeft  = Math.ceil((nextStart - today) / 86400000);
+    const ovDay     = l - 14;
+    const fertStart = ovDay - 5;
+    const fertEnd   = ovDay + 1;
+
+    const PHASES = [
+      {
+        name:'Período menstrual', icon:'🩸', color:'var(--rose)',
+        start:1, end:pd,
+        desc:'Tu cuerpo se renueva. Es momento de descanso y autocuidado.',
+        energy:'⬇️ Baja', mood:'Introvertida', exercise:'Yoga suave, caminata',
+        tips:[
+          {icon:'🌡️', text:'Bolsa de agua caliente para aliviar cólicos'},
+          {icon:'🍫', text:'Chocolate negro y plátano reducen los cólicos'},
+          {icon:'💊', text:'Ibuprofeno 400mg si el dolor es intenso'},
+          {icon:'😴', text:'Duerme más — tu cuerpo necesita regenerarse'},
+          {icon:'🧘', text:'Yoga suave o estiramientos, no ejercicio intenso'},
+          {icon:'💧', text:'Mucha agua e infusiones de manzanilla o jengibre'},
+          {icon:'🚿', text:'Duchas tibias relajan el abdomen'},
+          {icon:'❌', text:'Evita el frío extremo, el estrés y la cafeína'},
+        ],
+        foods:['🍫 Chocolate negro', '🍌 Plátano', '🫖 Manzanilla', '🥬 Espinaca', '🐟 Salmón'],
+      },
+      {
+        name:'Fase folicular', icon:'🌱', color:'var(--sky)',
+        start:pd+1, end:ovDay-3,
+        desc:'Tu energía crece cada día. El mejor momento para nuevos proyectos.',
+        energy:'⬆️ Creciendo', mood:'Optimista y social', exercise:'Cardio, crossfit, correr',
+        tips:[
+          {icon:'⚡', text:'Tu energía sube día a día — aprovéchala al máximo'},
+          {icon:'💪', text:'Ideal para ejercicio intenso: gym, HIIT, correr'},
+          {icon:'🧠', text:'Capacidad cognitiva al máximo — estudia temas difíciles'},
+          {icon:'✨', text:'Tu piel y cabello están en su mejor momento'},
+          {icon:'📚', text:'Perfecto para memorizar y aprender cosas nuevas'},
+          {icon:'🎯', text:'Empieza proyectos, presenta ideas, da exámenes'},
+          {icon:'🌸', text:'Tu sistema inmune está fuerte'},
+          {icon:'💃', text:'Te sientes más sociable y extrovertida'},
+        ],
+        foods:['🥚 Huevos', '🥦 Brócoli', '🫐 Arándanos', '🌰 Nueces', '🥗 Ensaladas'],
+      },
+      {
+        name:'Ovulación', icon:'🌟', color:'var(--gold)',
+        start:ovDay-2, end:ovDay+1,
+        desc:'Tu pico máximo de energía y carisma. ¡Aprovéchalo!',
+        energy:'🚀 Máxima', mood:'Carismática y segura', exercise:'Todo tipo de ejercicio',
+        tips:[
+          {icon:'🌟', text:'Estás en tu máximo de energía y atractivo natural'},
+          {icon:'🗣️', text:'Ideal para exposiciones, entrevistas y presentaciones'},
+          {icon:'💕', text:'Mayor conexión emocional y empatía'},
+          {icon:'🏆', text:'Afronta tus metas más difíciles hoy'},
+          {icon:'🎨', text:'Tu creatividad está en su pico más alto'},
+          {icon:'🤝', text:'Mejor momento para pedir favores o negociar'},
+          {icon:'💡', text:'Toma decisiones importantes — tu mente está clara'},
+          {icon:'🥗', text:'Come ligero y nutritivo para mantener la energía'},
+        ],
+        foods:['🥗 Ensaladas', '🍓 Fresas', '🫐 Arándanos', '🐟 Proteína magra', '🥑 Aguacate'],
+      },
+      {
+        name:'Fase lútea', icon:'🌙', color:'var(--plum-light)',
+        start:ovDay+2, end:l,
+        desc:'Tu cuerpo se prepara. Cuídate con amor y paciencia.',
+        energy:'⬇️ Descendiendo', mood:'Introspectiva', exercise:'Yoga, pilates, caminata',
+        tips:[
+          {icon:'💜', text:'Es completamente normal sentirte más sensible'},
+          {icon:'🍎', text:'Come carbohidratos complejos y magnesio — reducen el PMS'},
+          {icon:'🛁', text:'Baños calientes relajan el cuerpo y la mente'},
+          {icon:'📓', text:'Escribe en tu diario cómo te sientes'},
+          {icon:'🧘', text:'Meditación y respiración profunda ayudan mucho'},
+          {icon:'☕', text:'Reduce la cafeína — aumenta la irritabilidad'},
+          {icon:'😴', text:'Tu cuerpo necesita más sueño de lo habitual'},
+          {icon:'💆', text:'Date amor propio: face mask, series, tiempo para ti'},
+        ],
+        foods:['🍫 Chocolate negro', '🥜 Almendras', '🥦 Brócoli', '🍌 Plátano', '🫖 Té de manzanilla'],
+      },
+    ];
+
+    const phase = PHASES.find(p => day >= p.start && day <= p.end) || PHASES[3];
+    const isFert = day >= fertStart && day <= fertEnd;
+
+    // Generar calendario del ciclo (días del mes actual)
+    const todayDate = today.getDate();
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+
+    function getDayPhase(d) {
+      // Calcular qué día del ciclo es ese día del mes
+      const date = new Date(today.getFullYear(), today.getMonth(), d);
+      let cs2 = new Date(start);
+      while(true) { const n=new Date(cs2); n.setDate(n.getDate()+l); if(n>date) break; cs2=n; }
+      const dayInCyc = Math.floor((date-cs2)/86400000)+1;
+      if (dayInCyc < 1 || dayInCyc > l) return null;
+      if (dayInCyc <= pd) return {col:'rgba(232,84,122,0.35)', border:'rgba(232,84,122,0.6)'};
+      if (dayInCyc >= fertStart && dayInCyc <= fertEnd) return {col:'rgba(244,192,111,0.25)', border:'rgba(244,192,111,0.5)'};
+      if (dayInCyc >= ovDay-2 && dayInCyc <= ovDay+1) return {col:'rgba(244,192,111,0.4)', border:'rgba(244,192,111,0.8)'};
+      if (dayInCyc > ovDay+1) return {col:'rgba(155,89,182,0.2)', border:'rgba(155,89,182,0.4)'};
+      return {col:'rgba(110,203,245,0.15)', border:'rgba(110,203,245,0.3)'};
+    }
+
+    let calHtml = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:8px;">';
+    ['D','L','M','X','J','V','S'].forEach(d => {
+      calHtml += `<div style="text-align:center;font-size:10px;color:var(--cream-mute);padding:4px 0;">${d}</div>`;
+    });
+    for (let i=0; i<firstDay; i++) calHtml += '<div></div>';
+    for (let d=1; d<=daysInMonth; d++) {
+      const ph = getDayPhase(d);
+      const isToday = d === todayDate;
+      const bg = ph ? ph.col : 'rgba(255,255,255,0.04)';
+      const border = isToday ? '2px solid var(--rose-light)' : ph ? `1px solid ${ph.border}` : '1px solid transparent';
+      const fw = isToday ? '700' : '400';
+      calHtml += `<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:7px;background:${bg};border:${border};font-size:11px;font-weight:${fw};color:${isToday?'var(--rose-light)':'var(--cream-dim)'};">${d}</div>`;
+    }
+    calHtml += '</div>';
+    calHtml += `<div style="display:flex;flex-wrap:wrap;gap:8px;font-size:10px;color:var(--cream-mute);margin-bottom:4px;">
+      <span><span style="display:inline-block;width:10px;height:10px;background:rgba(232,84,122,0.35);border-radius:2px;margin-right:3px;"></span>Período</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:rgba(110,203,245,0.25);border-radius:2px;margin-right:3px;"></span>Folicular</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:rgba(244,192,111,0.4);border-radius:2px;margin-right:3px;"></span>Ovulación</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:rgba(155,89,182,0.25);border-radius:2px;margin-right:3px;"></span>Lútea</span>
+    </div>`;
+
+    el.innerHTML = `
+      <!-- ESTADO ACTUAL -->
+      <div class="card" style="text-align:center;background:linear-gradient(135deg,${phase.color}18,${phase.color}08);border-color:${phase.color}40;">
+        <div style="font-size:52px;margin-bottom:8px;">${phase.icon}</div>
+        <div style="font-size:22px;font-weight:700;color:${phase.color};">${phase.name}</div>
+        <div style="font-size:13px;color:var(--cream-mute);margin-top:6px;line-height:1.6;">${phase.desc}</div>
+        ${isFert ? `<div style="margin-top:8px;padding:6px 14px;background:rgba(244,192,111,0.15);border:1px solid rgba(244,192,111,0.35);border-radius:var(--r-full);display:inline-block;font-size:12px;color:var(--gold);">🌟 Días fértiles</div>` : ''}
+      </div>
+
+      <!-- STATS -->
+      <div class="card">
+        <div class="stat-grid" style="margin-bottom:14px;">
+          <div class="stat-item"><div class="stat-num">${day}</div><div class="stat-label">Día del ciclo (de ${l})</div></div>
+          <div class="stat-item"><div class="stat-num" style="color:${daysLeft<=3?'var(--danger)':daysLeft<=7?'var(--gold)':'var(--rose-light)'};">${daysLeft}</div><div class="stat-label">Días al próximo período</div></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:100px;background:rgba(255,255,255,0.04);border-radius:var(--r-sm);padding:10px;text-align:center;">
+            <div style="font-size:11px;color:var(--cream-mute);margin-bottom:4px;">Energía</div>
+            <div style="font-size:13px;font-weight:600;">${phase.energy}</div>
+          </div>
+          <div style="flex:1;min-width:100px;background:rgba(255,255,255,0.04);border-radius:var(--r-sm);padding:10px;text-align:center;">
+            <div style="font-size:11px;color:var(--cream-mute);margin-bottom:4px;">Estado de ánimo</div>
+            <div style="font-size:12px;font-weight:600;">${phase.mood}</div>
+          </div>
+          <div style="flex:1;min-width:100px;background:rgba(255,255,255,0.04);border-radius:var(--r-sm);padding:10px;text-align:center;">
+            <div style="font-size:11px;color:var(--cream-mute);margin-bottom:4px;">Ejercicio ideal</div>
+            <div style="font-size:11px;font-weight:600;">${phase.exercise}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CALENDARIO -->
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">📅</span> Calendario del mes</div>
+        ${calHtml}
+      </div>
+
+      <!-- ALIMENTOS RECOMENDADOS -->
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🥗</span> Alimentos recomendados ahora</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
+          ${phase.foods.map(f=>`<span class="chip chip-rose" style="font-size:12px;">${f}</span>`).join('')}
+        </div>
+      </div>
+
+      <!-- CONSEJOS DETALLADOS -->
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">💡</span> Consejos para esta fase</div>
+        ${phase.tips.map(t=>`
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+            <span style="font-size:20px;flex-shrink:0;line-height:1.4;">${t.icon}</span>
+            <span style="font-size:13px;color:var(--cream-dim);line-height:1.65;">${t.text}</span>
+          </div>`).join('')}
+      </div>
+
+      <!-- PREDICCIÓN PRÓXIMO CICLO -->
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">🔮</span> Predicción próximos 3 meses</div>
+        ${[0,1,2].map(m => {
+          const ns2 = new Date(cycStart); ns2.setDate(ns2.getDate() + l*(m+1));
+          const ov2 = new Date(cycStart); ov2.setDate(ov2.getDate() + l*m + ovDay);
+          const fe2 = new Date(cycStart); fe2.setDate(fe2.getDate() + l*m + fertStart);
+          return `<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+            <div style="font-size:13px;font-weight:600;color:var(--rose-light);margin-bottom:6px;">Ciclo ${m+1}</div>
+            <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--cream-mute);">
+              <span>🩸 Período: <strong style="color:var(--rose);">${ns2.toLocaleDateString('es-CO',{day:'numeric',month:'short'})}</strong></span>
+              <span>🥚 Ovulación: <strong style="color:var(--gold);">${ov2.toLocaleDateString('es-CO',{day:'numeric',month:'short'})}</strong></span>
+              <span>🌟 Fértil desde: <strong style="color:var(--mint);">${fe2.toLocaleDateString('es-CO',{day:'numeric',month:'short'})}</strong></span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+  } catch(e) {
+    console.error(e);
+    el.innerHTML = '<div class="card"><p class="text-mute">Error al calcular. Revisa las fechas ingresadas.</p></div>';
+  }
+}
 
 /* ══════════════════════════════════════
    FRASES
@@ -4670,8 +4881,215 @@ function _delAff(i){const a=G('tt_aff',[]);a.splice(i,1);S('tt_aff',a);_renderAf
 /* ══════════════════════════════════════
    IMC
    ══════════════════════════════════════ */
-function _buildIMC(el){el.innerHTML+=`<div class="card"><div class="card-title"><span class="card-title-icon">💪</span> Calculadora IMC</div><div class="col"><input type="number" class="input" id="imc-weight" placeholder="Peso (kg)" inputmode="decimal"/><input type="number" class="input" id="imc-height" placeholder="Altura (ej: 160 cm o 1.60 m)" step="0.01" inputmode="decimal"/><button class="btn btn-primary btn-full" onclick="_calcIMC()">Calcular</button><div id="imc-result"></div></div></div>`;}
-function _calcIMC(){const w=parseFloat(document.getElementById('imc-weight').value),hRaw=parseFloat(document.getElementById('imc-height').value),h=hRaw>3?hRaw/100:hRaw,el=document.getElementById('imc-result');if(!w||!h){el.innerHTML='<p class="text-mute text-center">Ingresa tu peso y altura</p>';return;}const imc=w/(h*h);let cat,col;if(imc<18.5){cat='Bajo peso';col='var(--sky)';}else if(imc<25){cat='Peso saludable ✅';col='var(--mint)';}else if(imc<30){cat='Sobrepeso';col='var(--gold)';}else{cat='Obesidad';col='var(--danger)';}const idealMin=(18.5*h*h).toFixed(1),idealMax=(24.9*h*h).toFixed(1);el.innerHTML=`<div style="text-align:center;margin-top:14px;padding:16px;background:rgba(255,255,255,0.04);border-radius:var(--r-md);"><div class="text-mute" style="margin-bottom:4px;font-size:12px;">Tu IMC</div><div style="font-family:var(--font-display);font-size:44px;color:${col};">${imc.toFixed(1)}</div><div style="font-size:15px;font-weight:600;color:${col};">${cat}</div><div class="text-mute" style="margin-top:8px;">Peso ideal para tu altura: ${idealMin} – ${idealMax} kg</div></div>`;}
+function _buildIMC(el) {
+  const hist = G('tt_imc_hist', []);
+  const last = hist[hist.length-1] || null;
+  el.innerHTML += `
+    <div class="card">
+      <div class="card-title"><span class="card-title-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+      </span> Calculadora IMC</div>
+      <p class="text-mute mb-12" style="font-size:12px;">Tu Índice de Masa Corporal y recomendaciones personalizadas</p>
+      <div class="col">
+        <div class="row" style="gap:10px;">
+          <div style="flex:1;">
+            <label class="text-mute" style="font-size:11px;display:block;margin-bottom:5px;">Peso (kg)</label>
+            <input type="number" class="input" id="imc-weight" placeholder="Ej: 58.5" inputmode="decimal" value="${last?last.w:''}"/>
+          </div>
+          <div style="flex:1;">
+            <label class="text-mute" style="font-size:11px;display:block;margin-bottom:5px;">Altura (cm o m)</label>
+            <input type="number" class="input" id="imc-height" placeholder="Ej: 165 ó 1.65" step="0.01" inputmode="decimal" value="${last?last.h:''}"/>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="_calcIMC()">Calcular y guardar</button>
+        <div id="imc-result"></div>
+      </div>
+    </div>
+    <div class="card" id="imc-hist-card" style="${hist.length<2?'display:none':''}">
+      <div class="card-title"><span class="card-title-icon">📈</span> Historial de peso</div>
+      <div id="imc-hist-list"></div>
+    </div>`;
+  if (last) _calcIMC(true);
+  _renderIMCHist();
+}
+
+function _calcIMC(silent) {
+  const wRaw = parseFloat(document.getElementById('imc-weight')?.value);
+  const hRaw = parseFloat(document.getElementById('imc-height')?.value);
+  const el   = document.getElementById('imc-result');
+  if (!wRaw || !hRaw || !el) return;
+  const h = hRaw > 3 ? hRaw/100 : hRaw;
+  const w = wRaw;
+  const imc = w/(h*h);
+  const idealMin = (18.5*h*h), idealMax = (24.9*h*h);
+  const diff = w - idealMax;
+
+  let cat, col, emoji, recs, tip;
+  if (imc < 18.5) {
+    cat='Bajo peso'; col='var(--sky)'; emoji='⚠️';
+    tip='Tu cuerpo necesita más nutrientes. Consulta un nutricionista.';
+    recs=[
+      {icon:'🥩','text':'Aumenta proteínas: pollo, huevo, legumbres, queso'},
+      {icon:'🥑','text':'Grasas saludables: aguacate, nueces, aceite de oliva'},
+      {icon:'🍚','text':'No omitas carbos: arroz, papa, avena, pan integral'},
+      {icon:'🏋️','text':'Ejercicio de fuerza para ganar masa muscular'},
+      {icon:'🥤','text':'Batidos nutritivos entre comidas si te cuesta comer'},
+      {icon:'😴','text':'Duerme 8h — el cuerpo construye músculo durmiendo'},
+      {icon:'👩‍⚕️','text':'Consulta con médico por posible déficit nutricional'},
+    ];
+  } else if (imc < 25) {
+    cat='Peso saludable'; col='var(--mint)'; emoji='✅';
+    tip='¡Estás en tu rango ideal! Mantén tus hábitos actuales.';
+    recs=[
+      {icon:'🎉','text':'¡Estás en tu peso ideal! Sigue así'},
+      {icon:'🥗','text':'Dieta equilibrada: verduras, proteínas, carbos complejos'},
+      {icon:'💪','text':'Ejercicio 3-4 veces por semana para mantener músculo'},
+      {icon:'💧','text':'8 vasos de agua diarios — hidratación constante'},
+      {icon:'😴','text':'7-8 horas de sueño para mantener el metabolismo'},
+      {icon:'🍎','text':'Frutas y snacks saludables entre comidas'},
+      {icon:'🩺','text':'Chequeo médico anual de rutina'},
+    ];
+  } else if (imc < 30) {
+    cat='Sobrepeso'; col='var(--gold)'; emoji='⚠️';
+    tip='Con pequeños cambios en tu rutina puedes llegar a tu peso ideal.';
+    recs=[
+      {icon:'🥗','text':'Reduce ultraprocesados, azúcar y harinas refinadas'},
+      {icon:'🚶','text':'Camina mínimo 8.000 pasos diarios — empieza hoy'},
+      {icon:'💧','text':'Toma un vaso de agua antes de cada comida'},
+      {icon:'🍽️','text':'Plato ideal: 50% verduras, 25% proteína, 25% carbos'},
+      {icon:'⏰','text':'No te saltes el desayuno — activa el metabolismo'},
+      {icon:'📱','text':'App de pasos (Samsung Health) para medir tu actividad'},
+      {icon:'👩‍⚕️','text':'Consulta con nutricionista para plan personalizado'},
+    ];
+  } else {
+    cat='Obesidad'; col='var(--danger)'; emoji='🔴';
+    tip='Tu salud es prioridad. Pequeños cambios sostenidos hacen la diferencia.';
+    recs=[
+      {icon:'👩‍⚕️','text':'Consulta urgente con médico y nutricionista'},
+      {icon:'🚶','text':'Empieza con caminata diaria de 20-30 minutos'},
+      {icon:'🥦','text':'Aumenta fibra: verduras, legumbres, frutas'},
+      {icon:'❌','text':'Elimina bebidas azucaradas y comida rápida'},
+      {icon:'📅','text':'Metas pequeñas y alcanzables semana a semana'},
+      {icon:'😴','text':'El mal sueño aumenta el peso — prioriza descansar'},
+      {icon:'🧠','text':'El estrés también engorda — maneja la ansiedad'},
+    ];
+  }
+
+  // Barra de progreso IMC (escala 15-40)
+  const imcPct = Math.min(Math.max((imc-15)/25*100, 0), 100);
+  const zones = [
+    {label:'Bajo', pct:14, col:'var(--sky)'},
+    {label:'Normal', pct:26, col:'var(--mint)'},
+    {label:'Sobre', pct:20, col:'var(--gold)'},
+    {label:'Obeso', pct:40, col:'var(--danger)'},
+  ];
+
+  el.innerHTML = `
+    <!-- Resultado principal -->
+    <div style="text-align:center;padding:20px 16px 16px;background:rgba(255,255,255,0.04);border-radius:var(--r-md);margin-top:12px;">
+      <div style="font-size:11px;color:var(--cream-mute);margin-bottom:6px;letter-spacing:1px;text-transform:uppercase;">Tu IMC</div>
+      <div style="font-family:var(--font-display);font-size:52px;font-weight:700;color:${col};line-height:1;">${imc.toFixed(1)}</div>
+      <div style="font-size:16px;font-weight:600;color:${col};margin-top:4px;">${emoji} ${cat}</div>
+      <div style="font-size:12px;color:var(--cream-mute);margin-top:8px;line-height:1.6;">${tip}</div>
+    </div>
+
+    <!-- Barra visual IMC -->
+    <div style="margin:14px 0 6px;">
+      <div style="display:flex;height:10px;border-radius:var(--r-full);overflow:hidden;margin-bottom:6px;">
+        <div style="flex:14;background:var(--sky);opacity:0.7;"></div>
+        <div style="flex:26;background:var(--mint);opacity:0.7;"></div>
+        <div style="flex:20;background:var(--gold);opacity:0.7;"></div>
+        <div style="flex:40;background:var(--danger);opacity:0.7;"></div>
+      </div>
+      <div style="position:relative;height:6px;">
+        <div style="position:absolute;left:${imcPct}%;transform:translateX(-50%);width:3px;height:16px;top:-10px;background:${col};border-radius:2px;box-shadow:0 0 8px ${col};"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--cream-mute);margin-top:8px;padding:0 2px;">
+        <span>15 — Bajo</span><span>18.5 — Normal</span><span>25 — Sobre</span><span>30 — Obeso</span><span>40</span>
+      </div>
+    </div>
+
+    <!-- Métricas -->
+    <div class="stat-grid" style="margin:14px 0;">
+      <div class="stat-item">
+        <div class="stat-num" style="font-size:18px;">${idealMin.toFixed(1)} — ${idealMax.toFixed(1)} kg</div>
+        <div class="stat-label">Peso ideal para tu altura</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" style="font-size:18px;color:${diff>0?'var(--danger)':'var(--mint)'};">${diff>0?'+':''}${diff.toFixed(1)} kg</div>
+        <div class="stat-label">${diff>0?'Por encima del ideal':'Dentro del rango ideal'}</div>
+      </div>
+    </div>
+
+    <!-- Recomendaciones -->
+    <div style="margin-top:4px;">
+      <div class="section-label" style="margin-bottom:10px;">💡 Recomendaciones para ti</div>
+      ${recs.map(r=>`
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+          <span style="font-size:18px;flex-shrink:0;line-height:1.4;">${r.icon}</span>
+          <span style="font-size:13px;color:var(--cream-dim);line-height:1.6;">${r.text}</span>
+        </div>`).join('')}
+    </div>
+  `;
+
+  // Guardar en historial (solo si no es carga silenciosa)
+  if (!silent) {
+    const hist = G('tt_imc_hist', []);
+    const today = new Date().toLocaleDateString('es-CO');
+    // No duplicar si ya hay un registro de hoy
+    const existing = hist.findIndex(x => x.date === today);
+    const entry = { date:today, w, h:hRaw, imc:parseFloat(imc.toFixed(1)) };
+    if (existing >= 0) hist[existing] = entry;
+    else hist.push(entry);
+    S('tt_imc_hist', hist);
+    _renderIMCHist();
+    const card = document.getElementById('imc-hist-card');
+    if (card && hist.length >= 2) card.style.display = 'block';
+    if (!silent) showToast('💾 IMC guardado en tu historial');
+  }
+}
+
+function _renderIMCHist() {
+  const el = document.getElementById('imc-hist-list');
+  if (!el) return;
+  const hist = G('tt_imc_hist', []);
+  if (hist.length < 2) return;
+  const recent = [...hist].reverse().slice(0, 8);
+  const min = Math.min(...hist.map(x=>x.imc));
+  const max = Math.max(...hist.map(x=>x.imc));
+  const range = max - min || 1;
+  el.innerHTML = recent.map((x, i) => {
+    const prev = recent[i+1];
+    const diff = prev ? (x.imc - prev.imc) : 0;
+    const arrow = diff > 0.1 ? `<span style="color:var(--danger);font-size:11px;">▲ +${diff.toFixed(1)}</span>` :
+                  diff < -0.1? `<span style="color:var(--mint);font-size:11px;">▼ ${diff.toFixed(1)}</span>` :
+                  `<span style="color:var(--cream-mute);font-size:11px;">— estable</span>`;
+    const barPct = ((x.imc - min) / range * 100);
+    const col = x.imc < 18.5 ? 'var(--sky)' : x.imc < 25 ? 'var(--mint)' : x.imc < 30 ? 'var(--gold)' : 'var(--danger)';
+    return `<div style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <span style="font-size:12px;color:var(--cream-mute);">${x.date}</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${arrow}
+          <span style="font-size:14px;font-weight:700;color:${col};">${x.imc}</span>
+          <span style="font-size:11px;color:var(--cream-mute);">${x.w}kg</span>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,0.06);border-radius:4px;height:5px;overflow:hidden;">
+        <div style="width:${Math.max(barPct,3)}%;height:100%;background:${col};border-radius:4px;"></div>
+      </div>
+    </div>`;
+  }).join('') +
+  `<button onclick="_clearIMCHist()" class="btn btn-danger-ghost btn-sm" style="width:100%;margin-top:10px;font-size:11px;">Limpiar historial</button>`;
+}
+
+function _clearIMCHist() {
+  if (!confirm('¿Eliminar todo el historial de IMC?')) return;
+  S('tt_imc_hist', []);
+  const card = document.getElementById('imc-hist-card');
+  if (card) card.style.display = 'none';
+  showToast('Historial eliminado');
+}
 
 /* ══════════════════════════════════════
    VISION
