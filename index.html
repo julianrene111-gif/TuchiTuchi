@@ -962,7 +962,7 @@ select.input option { background: #1c1428; }
 
     <div style="margin-bottom:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06);">
       <p style="font-size:13px;font-weight:600;color:var(--plum-light);margin-bottom:6px;">🎙️ ElevenLabs (voz natural — opcional)</p>
-      <p class="text-mute mb-12" style="font-size:12px;line-height:1.6;">Voz latinoamericana muy natural. Gratis en <strong>elevenlabs.io</strong> → API Keys.</p>
+      <p class="text-mute mb-12" style="font-size:12px;line-height:1.6;">Voz más natural. Gratis en <strong>elevenlabs.io</strong> → API Keys.<br><span style="color:rgba(86,217,160,0.7);">✓ Solo se guarda en este dispositivo, nunca en la nube.</span></p>
       <input type="password" class="input" id="el-key-input" placeholder="Pega tu API key de ElevenLabs..." autocomplete="off"/>
       <p class="text-mute mt-8" id="el-status" style="font-size:12px;"></p>
     </div>
@@ -1146,9 +1146,20 @@ async function loadData() {
     ]);
     if (snap.exists) {
       _cache = snap.data();
-      // Remover API keys del cache de Firestore por seguridad
+      // Remover API keys del cache en memoria
       delete _cache['tt_ak'];
       delete _cache['tt_el'];
+      // Si existían en Firestore, eliminarlas activamente (migración de seguridad)
+      const firestoreData = snap.data();
+      if (firestoreData['tt_ak'] || firestoreData['tt_el']) {
+        try {
+          await userDocRef.update({
+            tt_ak: firebase.firestore.FieldValue.delete(),
+            tt_el: firebase.firestore.FieldValue.delete()
+          });
+          console.log('🔒 API keys eliminadas de Firestore por seguridad');
+        } catch(e) { console.warn('Could not delete keys from Firestore:', e); }
+      }
       // sync to localStorage as backup
       Object.entries(_cache).forEach(([k,v]) => {
         try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){}
@@ -1211,7 +1222,11 @@ function S(k, v) {
 async function pushData() {
   if (!userDocRef || !navigator.onLine) { syncDot('error'); return; }
   try {
-    await userDocRef.set(_cache, { merge: true });
+    // Nunca escribir API keys en Firestore
+    const safeCache = {..._cache};
+    delete safeCache['tt_ak'];
+    delete safeCache['tt_el'];
+    await userDocRef.set(safeCache, { merge: true });
     syncDot('ok');
   } catch(e) {
     console.warn('Firestore write failed:', e);
@@ -2505,7 +2520,7 @@ function _speakBrowser(text) {
       vs.find(x => x.lang.startsWith('es'));
 
     if (v) { u.voice = v; }
-    u.rate  = 1.08;   /* velocidad natural */
+    u.rate  = 0.88;   /* velocidad natural */
     u.pitch = 1.05;   /* ligeramente más agudo — más femenino */
     u.volume = 1;
 
