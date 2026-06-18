@@ -1171,9 +1171,9 @@ select.input option { background: #1c1428; }
             </div>
           </div>
           <div class="g4" id="fin-dash-metrics" style="margin-bottom:16px"></div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:16px">
-            <div class="card"><div class="ctitle">Gastos por categoría</div><div style="position:relative;height:220px"><canvas id="fin-chart-donut"></canvas></div></div>
-            <div class="card"><div class="ctitle">Ingresos vs Gastos</div><div style="position:relative;height:220px"><canvas id="fin-chart-bars"></canvas></div></div>
+          <div class="g2" style="margin-bottom:16px">
+            <div class="card"><div class="ctitle">Gastos por categoría</div><div style="height:200px;display:flex;align-items:center;justify-content:center"><canvas id="fin-chart-donut"></canvas></div></div>
+            <div class="card"><div class="ctitle">Ingresos vs Gastos</div><div style="height:200px"><canvas id="fin-chart-bars"></canvas></div></div>
           </div>
           <div class="card"><div class="ctitle">Últimas transacciones</div><div id="fin-dash-recent"></div></div>
         </div>
@@ -1283,12 +1283,13 @@ select.input option { background: #1c1428; }
               <button class="btn bp" id="fin-btn-send-chat">➤</button>
             </div>
           </div>
-          <div class="card" style="margin-top:12px;border-color:rgba(86,217,160,0.3)">
+          <div class="card" style="margin-top:12px">
             <div class="ctitle">🔑 API Key de Claude</div>
-            <div id="fin-ak-status" style="font-size:.82rem;padding:10px 12px;border-radius:var(--r-sm);background:rgba(86,217,160,0.08);color:var(--mint)">
-              ✅ Usando la misma API Key que el chat principal de TuchiTuchi
+            <div style="display:flex;gap:8px">
+              <input type="password" id="fin-apikey-input" placeholder="sk-ant-..." style="margin-bottom:0">
+              <button class="btn bp bsm" id="fin-btn-save-key" style="flex-shrink:0;white-space:nowrap">Guardar</button>
             </div>
-            <p class="fhint" style="margin-top:8px">Si no funciona, ve a <strong>Más → Ajustes → API Key de Claude</strong> y guárdala ahí.</p>
+            <p class="fhint">Necesaria para el Asesor IA y escáner de recibos.</p>
           </div>
         </div>
 
@@ -1352,24 +1353,24 @@ select.input option { background: #1c1428; }
         <!-- AJUSTES -->
         <div id="fin-sec-settings" class="sec" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh"><h2>⚙️ Ajustes de Finanzas</h2></div>
-          <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="g2">
             <div class="card"><div class="ctitle">Moneda preferida</div><select id="fin-set-cur" style="margin-bottom:0"></select></div>
             <div class="card"><div class="ctitle">Ingreso pareja (hogar)</div>
               <input type="number" id="fin-couple-income" placeholder="Ingreso mensual pareja" style="margin-bottom:8px">
               <button class="btn bs bsm" id="fin-btn-save-couple">Guardar</button>
             </div>
-            <div class="card">
+            <div class="card" style="grid-column:span 2">
               <div class="ctitle">Exportar datos</div>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
                 <button class="btn bs bsm" id="fin-btn-export-csv">⬇ CSV</button>
                 <button class="btn bs bsm" id="fin-btn-export-json">⬇ JSON</button>
               </div>
             </div>
-            <div class="card" style="border-color:rgba(240,106,106,.3)">
+            <div class="card" style="grid-column:span 2;border-color:rgba(240,106,106,.3)">
               <div class="ctitle" style="color:var(--danger)">⚠️ Borrar todos los datos financieros</div>
               <p class="fhint">Escribe: <strong>SI QUIERO BORRAR TODO</strong></p>
-              <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-                <input type="text" id="fin-delete-input" placeholder="SI QUIERO BORRAR TODO" style="margin-bottom:0;flex:1;min-width:200px">
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <input type="text" id="fin-delete-input" placeholder="SI QUIERO BORRAR TODO" style="margin-bottom:0">
                 <button class="btn bd bsm" id="fin-btn-delete-all" style="flex-shrink:0;white-space:nowrap">Borrar</button>
               </div>
             </div>
@@ -1928,10 +1929,7 @@ function _loadFromLocalStorage() {
     'tt_habits','tt_grades','tt_sch','tt_evs','tt_rems','tt_mvs','tt_places',
     'tt_songs','tt_sdates','tt_vision','tt_challenges','tt_couple_ch','tt_capsules',
     'tt_mood','tt_health','tt_aff','tt_secret','tt_classes','tt_budget','tt_vault',
-    'tt_recurring','tt_badges','tt_ak','tt_el','tt_chat_sys',
-    'tt_fc_transactions','tt_fc_debts','tt_fc_goals','tt_fc_budgets',
-    'tt_fc_recurring','tt_fc_accounts','tt_fc_distributions','tt_fc_savingsReserved',
-    'tt_fc_currency'];
+    'tt_recurring','tt_badges','tt_ak','tt_el','tt_chat_sys'];
   keys.forEach(k => {
     try { const v = localStorage.getItem(k); if(v) _cache[k] = JSON.parse(v); } catch(e){}
   });
@@ -3553,19 +3551,6 @@ function renderFinance(){
   // tx type change
   document.getElementById('fin-tx-type')?.addEventListener('change',finFillTxCats);
   finInitConfirm(); finInitAmount();
-  // Close modals on outside click
-  document.querySelectorAll('#screen-finance .mo').forEach(mo => {
-    mo.addEventListener('click', e => {
-      if (e.target === mo) mo.classList.remove('open');
-    });
-  });
-  // Close confirm/amount overlays on outside click
-  document.getElementById('fin-co')?.addEventListener('click', e => {
-    if(e.target === document.getElementById('fin-co')) { document.getElementById('fin-co').classList.remove('open'); finConfirmCb&&finConfirmCb(false); }
-  });
-  document.getElementById('fin-am')?.addEventListener('click', e => {
-    if(e.target === document.getElementById('fin-am')) { document.getElementById('fin-am').classList.remove('open'); finAmountCb&&finAmountCb(null); }
-  });
   finGoTo('dashboard');
 }
 
@@ -3630,7 +3615,7 @@ function finRenderDonut(sorted){
   if(finDonutC){finDonutC.destroy();finDonutC=null;}
   if(!sorted.length){canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);return;}
   const colors=['#e8547a','#9b59b6','#56d9a0','#f4c06f','#6ecbf5','#f06a6a'];
-  finDonutC=new Chart(canvas,{type:'doughnut',data:{labels:sorted.map(([c])=>c.split(' ').slice(1).join(' ')||c),datasets:[{data:sorted.map(([,v])=>v),backgroundColor:colors.slice(0,sorted.length),borderWidth:0,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:2},plugins:{legend:{display:true,position:'bottom',labels:{color:'rgba(245,230,239,0.6)',font:{size:9},boxWidth:8,padding:5}}}}}});
+  finDonutC=new Chart(canvas,{type:'doughnut',data:{labels:sorted.map(([c])=>c.split(' ').slice(1).join(' ')||c),datasets:[{data:sorted.map(([,v])=>v),backgroundColor:colors.slice(0,sorted.length),borderWidth:0,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'rgba(245,230,239,0.6)',font:{size:9},boxWidth:10,padding:6}}}}});
 }
 
 function finRenderBars(months,inc,exp){
@@ -4168,10 +4153,12 @@ function finRenderReports(){
 // ASESOR IA
 // ═══════════════════
 function finSaveApiKey(){
-  // Finance uses the same API Key as TuchiTuchi main chat
-  finToast('Usa la API Key del chat principal (Más → Ajustes → API Key de Claude) ✅','w');
+  const key=document.getElementById('fin-apikey-input')?.value.trim();
+  if(!key){finToast('Ingresa la API Key','e');return;}
+  S('tt_fin_ak',btoa(key)); document.getElementById('fin-apikey-input').value='';
+  finToast('API Key guardada ✅');
 }
-function finGetKey(){ return G('tt_ak','') || null; }
+function finGetKey(){try{const v=G('tt_fin_ak','');return v?atob(v):null;}catch(e){return null;}}
 function finBuildCtx(){
   const c=fcur(),m=fcm();
   const txM=FD.transactions.filter(t=>fmk(t.date)===m&&t.category!=='🔀 Transferencia');
@@ -4371,13 +4358,9 @@ function finInitSettings(){
     cur.onchange=()=>{S(FP+'currency',cur.value);finToast(`Moneda: ${cur.value} ✅`);};}
   const ci=document.getElementById('fin-couple-income');
   if(ci)ci.value=localStorage.getItem('fin_coupleIncome')||'';
-  // Show API key status
   const ak=finGetKey();
-  const akStatus=document.getElementById('fin-ak-status');
-  if(akStatus) akStatus.innerHTML = ak
-    ? '✅ API Key activa — el Asesor IA está listo'
-    : '⚠️ Sin API Key. Ve a <strong>Más → Ajustes → API Key de Claude</strong> para activar el Asesor IA.';
-  if(akStatus) akStatus.style.color = ak ? 'var(--mint)' : 'var(--gold)';
+  const ki=document.getElementById('fin-apikey-input');
+  if(ki)ki.placeholder=ak?'API Key guardada — pega una nueva para cambiarla':'sk-ant-...';
 }
 
 // ═══════════════════
