@@ -1171,9 +1171,9 @@ select.input option { background: #1c1428; }
             </div>
           </div>
           <div class="g4" id="fin-dash-metrics" style="margin-bottom:16px"></div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:16px">
-            <div class="card"><div class="ctitle">Gastos por categoría</div><div style="position:relative;height:210px"><canvas id="fin-chart-donut"></canvas></div></div>
-            <div class="card"><div class="ctitle">Ingresos vs Gastos</div><div style="position:relative;height:210px"><canvas id="fin-chart-bars"></canvas></div></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:16px">
+            <div class="card"><div class="ctitle">Gastos por categoría</div><div style="position:relative;height:220px"><canvas id="fin-chart-donut"></canvas></div></div>
+            <div class="card"><div class="ctitle">Ingresos vs Gastos</div><div style="position:relative;height:220px"><canvas id="fin-chart-bars"></canvas></div></div>
           </div>
           <div class="card"><div class="ctitle">Últimas transacciones</div><div id="fin-dash-recent"></div></div>
         </div>
@@ -1285,8 +1285,10 @@ select.input option { background: #1c1428; }
           </div>
           <div class="card" style="margin-top:12px;border-color:rgba(86,217,160,0.3)">
             <div class="ctitle">🔑 API Key de Claude</div>
-            <div id="fin-ak-status" style="font-size:.82rem;padding:10px 12px;border-radius:var(--r-sm);background:rgba(86,217,160,0.08);color:var(--mint)">✅ Usando la API Key del chat principal</div>
-            <p class="fhint" style="margin-top:8px">Si el asesor no responde, ve a <strong>Más → Ajustes → API Key de Claude</strong> y guárdala ahí.</p>
+            <div id="fin-ak-status" style="font-size:.82rem;padding:10px 12px;border-radius:var(--r-sm);background:rgba(86,217,160,0.08);color:var(--mint)">
+              ✅ Usando la misma API Key que el chat principal de TuchiTuchi
+            </div>
+            <p class="fhint" style="margin-top:8px">Si no funciona, ve a <strong>Más → Ajustes → API Key de Claude</strong> y guárdala ahí.</p>
           </div>
         </div>
 
@@ -1366,8 +1368,8 @@ select.input option { background: #1c1428; }
             <div class="card" style="border-color:rgba(240,106,106,.3)">
               <div class="ctitle" style="color:var(--danger)">⚠️ Borrar todos los datos financieros</div>
               <p class="fhint">Escribe: <strong>SI QUIERO BORRAR TODO</strong></p>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-                <input type="text" id="fin-delete-input" placeholder="SI QUIERO BORRAR TODO" style="margin-bottom:0;flex:1;min-width:180px">
+              <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+                <input type="text" id="fin-delete-input" placeholder="SI QUIERO BORRAR TODO" style="margin-bottom:0;flex:1;min-width:200px">
                 <button class="btn bd bsm" id="fin-btn-delete-all" style="flex-shrink:0;white-space:nowrap">Borrar</button>
               </div>
             </div>
@@ -3551,15 +3553,18 @@ function renderFinance(){
   // tx type change
   document.getElementById('fin-tx-type')?.addEventListener('change',finFillTxCats);
   finInitConfirm(); finInitAmount();
-  // Close modals when tapping outside
+  // Close modals on outside click
   document.querySelectorAll('#screen-finance .mo').forEach(mo => {
-    mo.addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
+    mo.addEventListener('click', e => {
+      if (e.target === mo) mo.classList.remove('open');
+    });
   });
-  document.getElementById('fin-co')?.addEventListener('click', function(e){
-    if(e.target===this){ this.classList.remove('open'); finConfirmCb&&finConfirmCb(false); }
+  // Close confirm/amount overlays on outside click
+  document.getElementById('fin-co')?.addEventListener('click', e => {
+    if(e.target === document.getElementById('fin-co')) { document.getElementById('fin-co').classList.remove('open'); finConfirmCb&&finConfirmCb(false); }
   });
-  document.getElementById('fin-am')?.addEventListener('click', function(e){
-    if(e.target===this){ this.classList.remove('open'); finAmountCb&&finAmountCb(null); }
+  document.getElementById('fin-am')?.addEventListener('click', e => {
+    if(e.target === document.getElementById('fin-am')) { document.getElementById('fin-am').classList.remove('open'); finAmountCb&&finAmountCb(null); }
   });
   finGoTo('dashboard');
 }
@@ -3625,7 +3630,7 @@ function finRenderDonut(sorted){
   if(finDonutC){finDonutC.destroy();finDonutC=null;}
   if(!sorted.length){canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);return;}
   const colors=['#e8547a','#9b59b6','#56d9a0','#f4c06f','#6ecbf5','#f06a6a'];
-  finDonutC=new Chart(canvas,{type:'doughnut',data:{labels:sorted.map(([c])=>c.split(' ').slice(1).join(' ')||c),datasets:[{data:sorted.map(([,v])=>v),backgroundColor:colors.slice(0,sorted.length),borderWidth:0,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'rgba(245,230,239,0.6)',font:{size:9},boxWidth:10,padding:6}}}}});
+  finDonutC=new Chart(canvas,{type:'doughnut',data:{labels:sorted.map(([c])=>c.split(' ').slice(1).join(' ')||c),datasets:[{data:sorted.map(([,v])=>v),backgroundColor:colors.slice(0,sorted.length),borderWidth:0,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:2},plugins:{legend:{display:true,position:'bottom',labels:{color:'rgba(245,230,239,0.6)',font:{size:9},boxWidth:8,padding:5}}}}});
 }
 
 function finRenderBars(months,inc,exp){
@@ -4162,7 +4167,10 @@ function finRenderReports(){
 // ═══════════════════
 // ASESOR IA
 // ═══════════════════
-function finSaveApiKey(){ finToast('Configura la API Key en Más → Ajustes → API Key de Claude','w'); }
+function finSaveApiKey(){
+  // Finance uses the same API Key as TuchiTuchi main chat
+  finToast('Usa la API Key del chat principal (Más → Ajustes → API Key de Claude) ✅','w');
+}
 function finGetKey(){ return G('tt_ak','') || null; }
 function finBuildCtx(){
   const c=fcur(),m=fcm();
@@ -4363,9 +4371,13 @@ function finInitSettings(){
     cur.onchange=()=>{S(FP+'currency',cur.value);finToast(`Moneda: ${cur.value} ✅`);};}
   const ci=document.getElementById('fin-couple-income');
   if(ci)ci.value=localStorage.getItem('fin_coupleIncome')||'';
+  // Show API key status
   const ak=finGetKey();
-  const akEl=document.getElementById('fin-ak-status');
-  if(akEl){ akEl.textContent = ak ? '✅ API Key activa — Asesor IA listo' : '⚠️ Sin API Key. Ve a Más → Ajustes → API Key de Claude'; akEl.style.color = ak ? 'var(--mint)' : 'var(--gold)'; }
+  const akStatus=document.getElementById('fin-ak-status');
+  if(akStatus) akStatus.innerHTML = ak
+    ? '✅ API Key activa — el Asesor IA está listo'
+    : '⚠️ Sin API Key. Ve a <strong>Más → Ajustes → API Key de Claude</strong> para activar el Asesor IA.';
+  if(akStatus) akStatus.style.color = ak ? 'var(--mint)' : 'var(--gold)';
 }
 
 // ═══════════════════
