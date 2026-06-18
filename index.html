@@ -841,16 +841,16 @@ select.input option { background: #1c1428; }
   --rlg: var(--r-lg);
   --T: 0.2s ease;
   --sw: 220px;
+  /* Allow normal scroll — override TuchiTuchi's padding with 0 at top */
   padding: 0 !important;
-  overflow: hidden;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 #screen-finance * { box-sizing: border-box; }
 #screen-finance #app {
-  display: flex !important;
-  flex-direction: column;
-  height: 100%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  display: contents !important;
 }
 #screen-finance .topbar { display: none !important; }
 #screen-finance #sidebar { display: none !important; }
@@ -859,6 +859,14 @@ select.input option { background: #1c1428; }
 #screen-finance #content { padding: 14px 16px 100px; }
 #screen-finance .sec { display: none; }
 #screen-finance .sec.active { display: block; }
+/* fin-content must NOT restrict height or overflow */
+#fin-content {
+  flex: 1;
+  min-height: 0;
+}
+#fin-nav {
+  flex-shrink: 0;
+}
 #screen-finance .sh { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
 #screen-finance .sh h2 { font-size: 1.1rem; font-weight: 700; margin: 0; }
 
@@ -1154,7 +1162,7 @@ select.input option { background: #1c1428; }
       <div id="fin-content">
 
         <!-- DASHBOARD -->
-        <div id="fin-sec-dashboard" class="sec active" style="padding:14px 16px 100px">
+        <div id="fin-sec-dashboard" class="sec active" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh"><h2>📊 Dashboard</h2>
             <div style="display:flex;gap:7px;flex-wrap:wrap">
               <button class="btn bs bsm" id="fin-btn-dist">💸 Distribuir</button>
@@ -1171,7 +1179,7 @@ select.input option { background: #1c1428; }
         </div>
 
         <!-- TRANSACCIONES -->
-        <div id="fin-sec-transactions" class="sec" style="padding:14px 16px 100px">
+        <div id="fin-sec-transactions" class="sec" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh"><h2>💸 Transacciones</h2>
             <div style="display:flex;gap:7px">
               <button class="btn bs bsm" id="fin-btn-csv">⬇ CSV</button>
@@ -1188,38 +1196,38 @@ select.input option { background: #1c1428; }
         </div>
 
         <!-- PRESUPUESTOS -->
-        <div id="fin-sec-budgets" class="sec" style="padding:14px 16px 100px">
+        <div id="fin-sec-budgets" class="sec" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh"><h2>💰 Presupuestos</h2><button class="btn bp bsm" id="fin-btn-new-bud">+ Nuevo</button></div>
           <div id="fin-budgets-list" class="g2"></div>
         </div>
 
         <!-- DEUDAS -->
-        <div id="fin-sec-debts" class="sec" style="padding:14px 16px 100px">
+        <div id="fin-sec-debts" class="sec" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh"><h2>💳 Deudas</h2><button class="btn bp bsm" id="fin-btn-new-dbt">+ Nueva</button></div>
           <div id="fin-debts-list" class="g2"></div>
         </div>
 
         <!-- METAS -->
-        <div id="fin-sec-goals" class="sec" style="padding:14px 16px 100px">
+        <div id="fin-sec-goals" class="sec" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh"><h2>🎯 Metas</h2><button class="btn bp bsm" id="fin-btn-new-gl">+ Nueva</button></div>
           <div id="fin-goals-list" class="g2"></div>
         </div>
 
         <!-- RECURRENTES -->
-        <div id="fin-sec-recurring" class="sec" style="padding:14px 16px 100px">
+        <div id="fin-sec-recurring" class="sec" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh"><h2>🔄 Recurrentes</h2><button class="btn bp bsm" id="fin-btn-new-rec">+ Nuevo</button></div>
           <div class="card" style="margin-bottom:12px"><div class="ctitle">🔒 Fondos apartados este mes</div><div id="fin-rec-reserved"></div></div>
           <div id="fin-recurring-list" class="g2"></div>
         </div>
 
         <!-- CUENTAS -->
-        <div id="fin-sec-accounts" class="sec" style="padding:14px 16px 100px">
+        <div id="fin-sec-accounts" class="sec" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh"><h2>🏦 Cuentas</h2><button class="btn bp bsm" id="fin-btn-new-acc">+ Nueva</button></div>
           <div id="fin-accounts-list" class="g4"></div>
         </div>
 
         <!-- DIVISAS -->
-        <div id="fin-sec-currency" class="sec" style="padding:14px 16px 100px">
+        <div id="fin-sec-currency" class="sec" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh"><h2>💱 Divisas</h2></div>
           <div class="card" style="margin-bottom:14px">
             <div class="ctitle">Convertidor</div>
@@ -1248,7 +1256,7 @@ select.input option { background: #1c1428; }
         </div>
 
         <!-- REPORTES -->
-        <div id="fin-sec-reports" class="sec" style="padding:14px 16px 100px">
+        <div id="fin-sec-reports" class="sec" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh"><h2>📈 Reportes</h2></div>
           <div class="g4" id="fin-rep-metrics" style="margin-bottom:14px"></div>
           <div class="card" style="margin-bottom:14px"><div class="ctitle">Capacidad de Pago</div><div id="fin-rep-cap"></div></div>
@@ -1256,7 +1264,7 @@ select.input option { background: #1c1428; }
         </div>
 
         <!-- ASESOR IA -->
-        <div id="fin-sec-advisor" class="sec" style="padding:14px 16px 100px">
+        <div id="fin-sec-advisor" class="sec" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh"><h2>🤖 Asesor IA</h2></div>
           <div class="card" style="margin-bottom:12px">
             <div class="ctitle">Preguntas sugeridas</div>
@@ -1286,7 +1294,7 @@ select.input option { background: #1c1428; }
         </div>
 
         <!-- CALENDARIO -->
-        <div id="fin-sec-calendar" class="sec" style="padding:14px 16px 100px">
+        <div id="fin-sec-calendar" class="sec" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh">
             <h2>📆 Calendario</h2>
             <div style="display:flex;gap:7px;align-items:center">
@@ -1306,7 +1314,7 @@ select.input option { background: #1c1428; }
         </div>
 
         <!-- LOGROS -->
-        <div id="fin-sec-achievements" class="sec" style="padding:14px 16px 100px">
+        <div id="fin-sec-achievements" class="sec" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh"><h2>🏆 Logros</h2></div>
           <div class="card" style="margin-bottom:12px">
             <div class="ctitle">Progreso</div>
@@ -1317,7 +1325,7 @@ select.input option { background: #1c1428; }
         </div>
 
         <!-- SIMULADOR -->
-        <div id="fin-sec-simulator" class="sec" style="padding:14px 16px 100px">
+        <div id="fin-sec-simulator" class="sec" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh"><h2>🧮 Simulador de crédito</h2></div>
           <div class="card" style="max-width:420px">
             <div class="fg"><label>Monto del crédito</label><input type="number" id="fin-sim-amt" placeholder="5000000"></div>
@@ -1331,7 +1339,7 @@ select.input option { background: #1c1428; }
         </div>
 
         <!-- SPLIT -->
-        <div id="fin-sec-split" class="sec" style="padding:14px 16px 100px">
+        <div id="fin-sec-split" class="sec" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh"><h2>✂️ Split de gastos</h2></div>
           <div class="card" style="max-width:380px">
             <div class="fg"><label>Total de la cuenta</label><input type="number" id="fin-spl-total" placeholder="120000"></div>
@@ -1343,7 +1351,7 @@ select.input option { background: #1c1428; }
         </div>
 
         <!-- AJUSTES -->
-        <div id="fin-sec-settings" class="sec" style="padding:14px 16px 100px">
+        <div id="fin-sec-settings" class="sec" style="padding:14px 16px calc(var(--nav-h) + var(--safe-bot) + 24px)">
           <div class="sh"><h2>⚙️ Ajustes de Finanzas</h2></div>
           <div class="g2">
             <div class="card"><div class="ctitle">Moneda preferida</div><select id="fin-set-cur" style="margin-bottom:0"></select></div>
@@ -3154,18 +3162,32 @@ function _startMic() {
   _micRecog.continuous = true;
   _micRecog.interimResults = true;
 
+  let _micResultIdx = 0; // track from which index we already processed finals
+
   _micRecog.onresult = e => {
-    let fin='', interim='';
-    for (let i=0;i<e.results.length;i++) {
-      if (e.results[i].isFinal) fin += e.results[i][0].transcript + ' ';
-      else interim += e.results[i][0].transcript;
+    // Only process new final results from where we left off
+    for (let i = _micResultIdx; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        micTranscript += e.results[i][0].transcript + ' ';
+        _micResultIdx = i + 1;
+      }
     }
-    micTranscript = fin;
+    // Interim: only the latest non-final result
+    let interim = '';
+    for (let i = _micResultIdx; i < e.results.length; i++) {
+      if (!e.results[i].isFinal) interim += e.results[i][0].transcript;
+    }
     const ta = document.getElementById('chat-text-input');
-    ta.value = fin + interim;
+    ta.value = micTranscript + interim;
     ta.dispatchEvent(new Event('input'));
   };
-  _micRecog.onend = () => { if(micActive) { try{_micRecog.start();}catch(e){} } };
+  _micRecog.onend = () => {
+    if (micActive) {
+      // Reset index for the new session but keep accumulated transcript
+      _micResultIdx = 0;
+      try { _micRecog.start(); } catch(e) {}
+    }
+  };
   _micRecog.onerror = e => { if(e.error!=='no-speech') _stopMic(false); };
   try { _micRecog.start(); } catch(e) { _stopMic(false); }
 }
@@ -5969,19 +5991,25 @@ function _startClassRec() {
   _classRecog.lang = 'es-CO';
   _classRecog.continuous = true;
   _classRecog.interimResults = true;
+  let _classResultIdx = 0;
   _classRecog.onresult = e => {
-    let fin='', interim='';
-    for (let i=0;i<e.results.length;i++) {
-      if(e.results[i].isFinal) fin+=e.results[i][0].transcript+' ';
-      else interim+=e.results[i][0].transcript;
+    for (let i = _classResultIdx; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        _classTranscript += e.results[i][0].transcript + ' ';
+        _classResultIdx = i + 1;
+      }
     }
-    _classTranscript = fin;
+    let interim = '';
+    for (let i = _classResultIdx; i < e.results.length; i++) {
+      if (!e.results[i].isFinal) interim += e.results[i][0].transcript;
+    }
     const el = document.getElementById('rec-transcript');
-    if (el) { el.textContent = fin + interim; el.scrollTop = el.scrollHeight; }
+    if (el) { el.textContent = _classTranscript + interim; el.scrollTop = el.scrollHeight; }
   };
   _classRecog.onend = () => {
     const stopBtn = document.getElementById('rec-stop-btn');
     if (stopBtn && stopBtn.style.display !== 'none') {
+      _classResultIdx = 0;
       try { _classRecog.start(); } catch(e) {}
     }
   };
